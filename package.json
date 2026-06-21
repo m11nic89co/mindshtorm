@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:pages": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy-pages.ps1"
   },
   "dependencies": {
     "@xyflow/react": "^12.6.0",
