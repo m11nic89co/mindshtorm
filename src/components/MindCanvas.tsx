@@ -32,8 +32,10 @@ import type { CardNodeData, JsonCanvas } from '../types/jsonCanvas';
 import { HintBar, SelectionPanel, Toolbar } from './Toolbar';
 import { GroupCardNode, TextCardNode } from './nodes/CardNodes';
 
-const STORAGE_KEY = 'mindshtorm.canvas.v1';
-const BOARD_NAME_KEY = 'mindshtorm.boardName';
+const STORAGE_KEY = 'mindstorm.canvas.v1';
+const LEGACY_STORAGE_KEY = 'mindshtorm.canvas.v1';
+const BOARD_NAME_KEY = 'mindstorm.boardName';
+const LEGACY_BOARD_NAME_KEY = 'mindshtorm.boardName';
 
 const nodeTypes: NodeTypes = {
   textCard: TextCardNode,
@@ -42,7 +44,11 @@ const nodeTypes: NodeTypes = {
 
 function loadInitialState(): { nodes: Node<CardNodeData>[]; edges: Edge[] } {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) localStorage.setItem(STORAGE_KEY, raw);
+    }
     if (raw) return canvasToFlow(JSON.parse(raw));
   } catch {
     /* use demo */
@@ -62,9 +68,13 @@ function MindCanvasInner() {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [activeBoardName, setActiveBoardName] = useState<string | null>(
-    () => localStorage.getItem(BOARD_NAME_KEY),
-  );
+  const [activeBoardName, setActiveBoardName] = useState<string | null>(() => {
+    const name = localStorage.getItem(BOARD_NAME_KEY) ?? localStorage.getItem(LEGACY_BOARD_NAME_KEY);
+    if (name && !localStorage.getItem(BOARD_NAME_KEY)) {
+      localStorage.setItem(BOARD_NAME_KEY, name);
+    }
+    return name;
+  });
 
   const selectedNode = nodes.find((n) => n.selected);
 

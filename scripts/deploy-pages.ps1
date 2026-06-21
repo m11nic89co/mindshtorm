@@ -29,4 +29,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 git push -f origin gh-pages
 
-Write-Host "Deployed: https://m11nic89co.github.io/mindshtorm/"
+Write-Host "Deployed MindStorm: https://m11nic89co.github.io/mindshtorm/"

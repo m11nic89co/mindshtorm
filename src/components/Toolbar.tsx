@@ -27,7 +27,7 @@ export function Toolbar({
       <div className="pointer-events-auto flex max-w-full items-center gap-1 rounded-2xl border border-white/10 bg-white/5 px-2 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-2xl sm:gap-2 sm:px-3">
         <div className="mr-1 flex shrink-0 items-center gap-2 border-r border-white/10 pr-2 sm:mr-2 sm:pr-3">
           <LogoMark />
-          <div className="text-sm font-semibold tracking-tight text-white">MindShtorm</div>
+          <div className="text-sm font-semibold tracking-tight text-white">MindStorm</div>
         </div>
 
         <div className="flex max-w-[calc(100vw-6rem)] items-center gap-1 overflow-x-auto sm:gap-2">
@@ -93,7 +93,7 @@ export function HintBar() {
     <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:p-4">
       <div className="rounded-full border border-white/8 bg-black/25 px-3 py-1.5 text-[10px] text-white/45 backdrop-blur-xl sm:px-4 sm:py-2 sm:text-[11px]">
         <span className="hidden sm:inline">
-          Двойной клик — карточка · Сохранить / Загрузить — файл .mindshtorm · Delete — удалить · Колёсико — масштаб
+          Двойной клик — карточка · Сохранить / Загрузить — файл .mindstorm · Delete — удалить · Колёсико — масштаб
         </span>
         <span className="sm:hidden">Тап×2 — карточка · 💾/📂 — файл · Щипок — масштаб</span>
       </div>

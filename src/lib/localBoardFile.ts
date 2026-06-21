@@ -1,12 +1,15 @@
 import type { JsonCanvas } from '../types/jsonCanvas';
 import { parseCanvasFile } from './jsonCanvas';
 
-/** Формат файла MindShtorm — JSON Canvas + метаданные, расширение .mindshtorm */
-export const BOARD_FILE_EXTENSION = '.mindshtorm';
-export const BOARD_FILE_ACCEPT = '.mindshtorm,.canvas,application/json';
+/** Формат файла MindStorm — JSON Canvas + метаданные, расширение .mindstorm */
+export const BOARD_FILE_EXTENSION = '.mindstorm';
+export const BOARD_FILE_ACCEPT = '.mindstorm,.mindshtorm,.canvas,application/json';
 
-export type MindShtormBoardFile = {
-  format: 'mindshtorm-board';
+export const BOARD_FORMAT_ID = 'mindstorm-board';
+export const LEGACY_BOARD_FORMAT_ID = 'mindshtorm-board';
+
+export type MindStormBoardFile = {
+  format: typeof BOARD_FORMAT_ID | typeof LEGACY_BOARD_FORMAT_ID;
   version: 1;
   title: string;
   savedAt: string;
@@ -25,10 +28,16 @@ export class SaveCancelledError extends Error {
   }
 }
 
-export function buildBoardFile(title: string, canvas: JsonCanvas): MindShtormBoardFile {
+function isBoardFile(parsed: unknown): parsed is MindStormBoardFile {
+  if (!parsed || typeof parsed !== 'object') return false;
+  const format = (parsed as MindStormBoardFile).format;
+  return format === BOARD_FORMAT_ID || format === LEGACY_BOARD_FORMAT_ID;
+}
+
+export function buildBoardFile(title: string, canvas: JsonCanvas): MindStormBoardFile {
   const safeTitle = title.trim() || 'моя-схема';
   return {
-    format: 'mindshtorm-board',
+    format: BOARD_FORMAT_ID,
     version: 1,
     title: safeTitle,
     savedAt: new Date().toISOString(),
@@ -40,16 +49,15 @@ export function parseBoardFile(content: string, fallbackTitle = 'схема'): {
   title: string;
   canvas: JsonCanvas;
 } {
-  const parsed = JSON.parse(content) as MindShtormBoardFile | JsonCanvas;
+  const parsed = JSON.parse(content) as MindStormBoardFile | JsonCanvas;
 
-  if (parsed && typeof parsed === 'object' && 'format' in parsed && parsed.format === 'mindshtorm-board') {
-    const file = parsed as MindShtormBoardFile;
-    if (!file.canvas || typeof file.canvas !== 'object') {
-      throw new Error('В файле .mindshtorm нет данных схемы');
+  if (isBoardFile(parsed)) {
+    if (!parsed.canvas || typeof parsed.canvas !== 'object') {
+      throw new Error('В файле .mindstorm нет данных схемы');
     }
     return {
-      title: file.title?.trim() || fallbackTitle,
-      canvas: file.canvas,
+      title: parsed.title?.trim() || fallbackTitle,
+      canvas: parsed.canvas,
     };
   }
 
@@ -98,8 +106,8 @@ export async function saveBoardToDisk(title: string, canvas: JsonCanvas): Promis
         suggestedName: filename,
         types: [
           {
-            description: 'Схема MindShtorm',
-            accept: { 'application/json': ['.mindshtorm'] },
+            description: 'Схема MindStorm',
+            accept: { 'application/json': ['.mindstorm'] },
           },
         ],
       });
@@ -118,19 +126,13 @@ export async function saveBoardToDisk(title: string, canvas: JsonCanvas): Promis
   return { filename, method: 'download' };
 }
 
-/** @deprecated используйте saveBoardToDisk */
-export function downloadBoardFile(title: string, canvas: JsonCanvas) {
-  const safeTitle = title.trim() || 'моя-схема';
-  const json = JSON.stringify(buildBoardFile(safeTitle, canvas), null, 2);
-  triggerDownload(buildFilename(safeTitle), json);
-}
-
 export function readBoardFromFile(file: File): Promise<{ title: string; canvas: JsonCanvas }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const fallbackTitle = file.name.replace(/\.(mindshtorm|canvas)$/i, '') || 'схема';
+        const fallbackTitle =
+          file.name.replace(/\.(mindstorm|mindshtorm|canvas)$/i, '') || 'схема';
         resolve(parseBoardFile(String(reader.result ?? ''), fallbackTitle));
       } catch (error) {
         reject(error instanceof Error ? error : new Error('Не удалось прочитать файл'));
@@ -142,7 +144,7 @@ export function readBoardFromFile(file: File): Promise<{ title: string; canvas: 
 }
 
 export function titleFromFilename(filename: string): string {
-  return filename.replace(/\.(mindshtorm|canvas)$/i, '') || 'моя-схема';
+  return filename.replace(/\.(mindstorm|mindshtorm|canvas)$/i, '') || 'моя-схема';
 }
 
 export function saveSuccessMessage(result: SaveBoardResult): string {

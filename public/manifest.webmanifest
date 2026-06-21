@@ -1,6 +1,6 @@
 {
-  "name": "MindShtorm — доска для брейншторма",
-  "short_name": "MindShtorm",
+  "name": "MindStorm — доска для брейншторма",
+  "short_name": "MindStorm",
   "description": "Интерактивная доска в стиле Obsidian Canvas для идей и mind map",
   "start_url": "./",
   "scope": "./",
