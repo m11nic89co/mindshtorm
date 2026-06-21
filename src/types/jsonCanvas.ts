@@ -1,4 +1,5 @@
 export type CanvasSide = 'top' | 'right' | 'bottom' | 'left';
+export type HandleSlot = 'a' | 'b';
 export type CanvasColor = '1' | '2' | '3' | '4' | '5' | '6' | string;
 
 export interface JsonCanvasNodeBase {
@@ -46,9 +47,12 @@ export interface JsonCanvasEdge {
   id: string;
   fromNode: string;
   fromSide?: CanvasSide;
+  /** MindStorm: точка на стороне (25% = a, 75% = b) */
+  fromSlot?: HandleSlot;
   fromEnd?: 'none' | 'arrow';
   toNode: string;
   toSide?: CanvasSide;
+  toSlot?: HandleSlot;
   toEnd?: 'none' | 'arrow';
   color?: CanvasColor;
   label?: string;

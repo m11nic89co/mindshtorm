@@ -2,22 +2,32 @@ import type { Edge, Node } from '@xyflow/react';
 import type {
   CanvasSide,
   CardNodeData,
+  HandleSlot,
   JsonCanvas,
   JsonCanvasEdge,
   JsonCanvasNode,
 } from '../types/jsonCanvas';
 import { edgeLabelProps, normalizeFlowEdge, syncEdgesWithSourceColors } from './flowEdges';
 
-function sideToHandle(side: CanvasSide | undefined, role: 'source' | 'target'): string {
+function sideToHandle(
+  side: CanvasSide | undefined,
+  slot: HandleSlot | undefined,
+  role: 'source' | 'target',
+): string {
   const resolved = side ?? (role === 'source' ? 'right' : 'left');
-  return `source-${resolved}-a`;
+  return `source-${resolved}-${slot ?? 'a'}`;
 }
 
-function handleToSide(handleId: string | null | undefined, fallback: CanvasSide): CanvasSide {
-  if (!handleId) return fallback;
-  const match = handleId.match(/(?:^source-|^target-)(top|right|bottom|left)/);
-  if (match) return match[1] as CanvasSide;
-  return fallback;
+function handleToSideAndSlot(
+  handleId: string | null | undefined,
+  fallback: CanvasSide,
+): { side: CanvasSide; slot: HandleSlot } {
+  if (!handleId) return { side: fallback, slot: 'a' };
+  const match = handleId.match(/^source-(top|right|bottom|left)(?:-(a|b))?$/);
+  if (match) {
+    return { side: match[1] as CanvasSide, slot: (match[2] as HandleSlot | undefined) ?? 'a' };
+  }
+  return { side: fallback, slot: 'a' };
 }
 
 export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[]; edges: Edge[] } {
@@ -52,8 +62,8 @@ export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[];
         id: edge.id,
         source: edge.fromNode,
         target: edge.toNode,
-        sourceHandle: sideToHandle(edge.fromSide, 'source'),
-        targetHandle: sideToHandle(edge.toSide, 'target'),
+        sourceHandle: sideToHandle(edge.fromSide, edge.fromSlot, 'source'),
+        targetHandle: sideToHandle(edge.toSide, edge.toSlot, 'target'),
         ...edgeLabelProps(edge.label),
       }),
     ),
@@ -99,17 +109,23 @@ export function flowToCanvas(nodes: Node<CardNodeData>[], edges: Edge[]): JsonCa
     .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
     .map(flowNodeToCanvas);
 
-  const canvasEdges: JsonCanvasEdge[] = edges.map((edge) => ({
-    id: edge.id,
-    fromNode: edge.source,
-    toNode: edge.target,
-    fromSide: handleToSide(edge.sourceHandle, 'right'),
-    toSide: handleToSide(edge.targetHandle, 'left'),
-    fromEnd: 'none',
-    toEnd: 'arrow',
-    label: typeof edge.label === 'string' ? edge.label : undefined,
-    color: nodes.find((node) => node.id === edge.source)?.data.color,
-  }));
+  const canvasEdges: JsonCanvasEdge[] = edges.map((edge) => {
+    const from = handleToSideAndSlot(edge.sourceHandle, 'right');
+    const to = handleToSideAndSlot(edge.targetHandle, 'left');
+    return {
+      id: edge.id,
+      fromNode: edge.source,
+      toNode: edge.target,
+      fromSide: from.side,
+      fromSlot: from.slot,
+      toSide: to.side,
+      toSlot: to.slot,
+      fromEnd: 'none',
+      toEnd: 'arrow',
+      label: typeof edge.label === 'string' ? edge.label : undefined,
+      color: nodes.find((node) => node.id === edge.source)?.data.color,
+    };
+  });
 
   return { nodes: canvasNodes, edges: canvasEdges };
 }

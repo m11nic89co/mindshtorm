@@ -105,18 +105,25 @@ export function connectionFromDragStart(
   return connection;
 }
 
-function isSameNodePair(
-  sourceA: string,
-  targetA: string,
-  sourceB: string,
-  targetB: string,
-): boolean {
-  return (
-    (sourceA === sourceB && targetA === targetB) || (sourceA === targetB && targetA === sourceB)
+function findEdgeIndexForConnection(edges: Edge[], connection: Connection): number {
+  const { source, target, sourceHandle, targetHandle } = connection;
+  if (!source || !target) return -1;
+
+  // Одна исходящая связь на точку (handle) — до 8 на карточку
+  if (sourceHandle) {
+    return edges.findIndex((edge) => edge.source === source && edge.sourceHandle === sourceHandle);
+  }
+
+  return edges.findIndex(
+    (edge) =>
+      edge.source === source &&
+      edge.target === target &&
+      edge.sourceHandle === sourceHandle &&
+      edge.targetHandle === targetHandle,
   );
 }
 
-/** Одна связь на пару карточек; обратное направление переворачивает существующую. */
+/** До одной связи на каждую точку (handle); A→B и B→A — разные связи. */
 export function applyConnection(
   edges: Edge[],
   connection: Connection,
@@ -126,7 +133,7 @@ export function applyConnection(
   if (!source || !target || source === target) return edges;
 
   const sourceColor = nodes.find((node) => node.id === source)?.data.color;
-  const idx = edges.findIndex((edge) => isSameNodePair(edge.source, edge.target, source, target));
+  const idx = findEdgeIndexForConnection(edges, connection);
 
   const nextEdge: Edge = normalizeFlowEdge(
     {
