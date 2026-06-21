@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # Deploy built app to GitHub Pages (gh-pages branch)
 $ErrorActionPreference = "Stop"
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
 
 npm run build

@@ -26,7 +26,7 @@ import {
   parseCanvasFile,
 } from '../lib/jsonCanvas';
 import type { CardNodeData } from '../types/jsonCanvas';
-import { ColorPicker, HintBar, SelectionPanel, Toolbar } from './Toolbar';
+import { HintBar, SelectionPanel, Toolbar } from './Toolbar';
 import { GroupCardNode, TextCardNode } from './nodes/CardNodes';
 
 const STORAGE_KEY = 'mindshtorm.canvas.v1';
