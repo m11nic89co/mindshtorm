@@ -123,8 +123,6 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
         isVisible={selected}
         minWidth={220}
         minHeight={120}
-        maxWidth={1600}
-        maxHeight={1200}
         color="#22d3ee"
         handleClassName="!h-3 !w-3 !rounded-full !border-2 !border-white/50 !bg-cyan-400 !shadow-[0_0_8px_rgba(34,211,238,0.55)]"
         lineClassName="!border-cyan-400/45"

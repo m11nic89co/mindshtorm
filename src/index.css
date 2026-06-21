@@ -114,6 +114,22 @@ body {
   z-index: 3;
 }
 
+/* Группа под карточками — ручки resize не должны перекрываться содержимым */
+.mind-canvas.mind-canvas--group-selected .react-flow__node-textCard,
+.mind-canvas.mind-canvas--group-selected .react-flow__node-groupCard .card-face,
+.mind-canvas.mind-canvas--group-selected .react-flow__node-groupCard .react-flow__handle,
+.mind-canvas.mind-canvas--group-resizing .react-flow__node-textCard,
+.mind-canvas.mind-canvas--group-resizing .react-flow__node-groupCard .card-face,
+.mind-canvas.mind-canvas--group-resizing .react-flow__node-groupCard .react-flow__handle {
+  pointer-events: none !important;
+}
+
+.mind-canvas.mind-canvas--group-selected .react-flow__resize-control,
+.mind-canvas.mind-canvas--group-resizing .react-flow__resize-control {
+  pointer-events: auto !important;
+  z-index: 1000 !important;
+}
+
 /* --- Демо: появление карточек и связей --- */
 @keyframes demo-node-in {
   from {

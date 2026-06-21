@@ -115,6 +115,7 @@ function MindCanvasInner() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [connectLineStyle, setConnectLineStyle] = useState(FLOW_EDGE_STYLE);
   const [canvasDragging, setCanvasDragging] = useState(false);
+  const [groupResizingId, setGroupResizingId] = useState<string | null>(null);
   const [demoRevealing, setDemoRevealing] = useState(false);
   const [demoSplash, setDemoSplash] = useState(false);
   const demoStatsMemo = useMemo(() => demoStats(locale), [locale]);
@@ -141,6 +142,7 @@ function MindCanvasInner() {
 
   const onGroupResizeStart = useCallback((groupId: string) => {
     dragPausedRef.current = true;
+    setGroupResizingId(groupId);
     const group = nodesRef.current.find((n) => n.id === groupId);
     if (!group) return;
     groupResizeSnapshotRef.current = createGroupResizeSnapshot(group, nodesRef.current);
@@ -166,11 +168,17 @@ function MindCanvasInner() {
   const onGroupResizeEnd = useCallback(
     (_groupId: string) => {
       dragPausedRef.current = false;
+      setGroupResizingId(null);
       groupResizeSnapshotRef.current = null;
       commitNow();
       persistCanvas(nodesRef.current, edgesRef.current);
     },
     [commitNow],
+  );
+
+  const hasSelectedGroup = useMemo(
+    () => nodes.some((node) => node.selected && node.type === 'groupCard'),
+    [nodes],
   );
 
   const showToast = useCallback((message: string) => {
@@ -605,7 +613,7 @@ function MindCanvasInner() {
           }}
           connectionLineStyle={connectLineStyle}
           proOptions={{ hideAttribution: true }}
-          className={`mind-canvas${demoRevealing ? ' mind-canvas--demo-reveal' : ''}${canvasDragging ? ' mind-canvas--dragging' : ''}`}
+          className={`mind-canvas${demoRevealing ? ' mind-canvas--demo-reveal' : ''}${canvasDragging ? ' mind-canvas--dragging' : ''}${hasSelectedGroup ? ' mind-canvas--group-selected' : ''}${groupResizingId ? ' mind-canvas--group-resizing' : ''}`}
         >
           <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="rgba(255,255,255,0.06)" />
           <Controls

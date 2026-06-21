@@ -138,6 +138,16 @@ export function applyGroupResizeToNodes(
   const childById = new Map(snapshot.children.map((child) => [child.id, child]));
 
   return nodes.map((node) => {
+    if (node.id === snapshot.groupId) {
+      return {
+        ...node,
+        position: { x: next.x, y: next.y },
+        width: gw2,
+        height: gh2,
+        style: { ...node.style, width: gw2, height: gh2 },
+      };
+    }
+
     const child = childById.get(node.id);
     if (!child) return node;
 
