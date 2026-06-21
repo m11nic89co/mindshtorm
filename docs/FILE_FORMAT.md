@@ -25,7 +25,7 @@
 | `savedAt` | ISO 8601 | Время сохранения |
 | `canvas` | object | JSON Canvas |
 
-Расширение файла: **`.mindstorm`**
+Расширение: **`.mindstorm`**
 
 ## JSON Canvas (поле `canvas`)
 
@@ -33,14 +33,30 @@
 
 ### Узлы
 
-| type | Описание |
-|------|----------|
-| `text` | Текстовая карточка (`text`) |
-| `group` | Группа (`label`) |
-| `link` | Ссылка (`url`) — тип поддержан, UI минимален |
-| `file` | Файл Obsidian — тип поддержан, UI минимален |
+| type | Поля | Описание |
+|------|------|----------|
+| `text` | `text`, `label?` | Карточка; `label` — расширение MindStorm (badge в UI) |
+| `group` | `label?` | Группа |
+| `link` | `url` | Ссылка — тип в коде, UI минимален |
+| `file` | `file` | Файл Obsidian — тип в коде, UI минимален |
 
-Общие поля: `id`, `x`, `y`, `width`, `height`, `color` (`"1"`…`"6"`).
+Общие поля: `id`, `x`, `y`, `width`, `height`, `color` (`"1"`…`"12"`).
+
+Пример text-узла с названием:
+
+```json
+{
+  "id": "card1",
+  "type": "text",
+  "x": 100,
+  "y": 100,
+  "width": 260,
+  "height": 120,
+  "color": "5",
+  "label": "Идея",
+  "text": "## Заголовок\nТекст карточки"
+}
+```
 
 ### Связи
 
@@ -52,9 +68,12 @@
   "toNode": "branch",
   "toSide": "left",
   "fromEnd": "none",
-  "toEnd": "arrow"
+  "toEnd": "arrow",
+  "label": "связь"
 }
 ```
+
+В runtime MindStorm использует 8 handles на узел; при сохранении достаточно `fromSide` / `toSide`.
 
 ## Совместимость
 
@@ -70,6 +89,6 @@
 - `src/lib/localBoardFile.ts` — serialize / parse / download / FileReader
 - `src/lib/jsonCanvas.ts` — `canvasToFlow` / `flowToCanvas`
 
-## Пример в репозитории
+## Демо в коде
 
-Демо-схема: `src/lib/demoCanvas.ts` → `DEMO_CANVAS` (встроена в код).
+`src/lib/demoCanvas.ts` — `getDemoCanvas('ru' | 'en')`, две встроенные схемы.

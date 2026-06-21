@@ -5,8 +5,9 @@
 ## Быстрые факты
 
 - Продукт: **MindStorm** (большая **S**).
-- Не использовать: MindShtorm, mindshtorm (кроме legacy совместимости файлов: `.mindshtorm`, `mindshtorm-board`).
+- Не использовать: MindShtorm, mindshtorm (кроме legacy: `.mindshtorm`, `mindshtorm-board`).
 - Ответы пользователю — **на русском**.
+- UI приложения: **RU по умолчанию**, есть **EN** (`src/i18n/messages.ts`).
 - Коммиты и push — **только по явной просьбе**.
 
 ## Критичные файлы
@@ -14,29 +15,32 @@
 | Задача | Файл |
 |--------|------|
 | Холст, UX | `src/components/MindCanvas.tsx` |
-| Toolbar, панели | `src/components/Toolbar.tsx` |
+| Toolbar, панели, RU/EN | `src/components/Toolbar.tsx` |
+| Локализация | `src/i18n/messages.ts`, `LocaleProvider.tsx` |
 | Точки связи | `src/components/nodes/edgeHandles.tsx` |
 | Слои групп/рёбер | `src/index.css` |
 | Save/load / storage | `src/lib/localBoardFile.ts`, `src/lib/boardStorage.ts` |
-| Формат JSON Canvas | `src/lib/jsonCanvas.ts`, `src/lib/flowEdges.ts` |
-| Демо-схема | `src/lib/demoCanvas.ts` |
+| JSON Canvas | `src/lib/jsonCanvas.ts`, `src/lib/flowEdges.ts` |
+| Демо-схема (RU/EN) | `src/lib/demoCanvas.ts` |
 | Цвета (12) | `src/lib/colors.ts` |
 | Undo/redo | `src/hooks/useCanvasHistory.ts` |
 | ПКМ-рамка | `src/hooks/useRightClickMarquee.ts` |
-| Деплoy | `scripts/deploy-pages.ps1` |
+| Деплoy | `.github/workflows/deploy.yml`, `scripts/deploy-pages.ps1` |
 
 ## Не ломать
 
-- Гroups `z-index: -1` — линии связей **всегда** над группами.
+- Groups `z-index: -1` — линии связей **всегда** над группами.
 - Создание карточки только двойным кликом по **пустому** холсту.
 - `zIndexMode="manual"`, `elevateNodesOnSelect={false}` на ReactFlow.
+- «Сначала» — **не** вызывает `resetHistory` (нужен Undo).
+- Новые UI-строки — **в оба языка** в `messages.ts`.
 
-## Деплой (Windows)
+## Деплoy (Windows)
 
 ```powershell
 $env:Path = "C:\Program Files\nodejs;" + $env:Path
-cd "G:\Мой диск\Projects\MindStorm"   # git + Cursor; push → CI деплой
-npm run deploy:pages
+cd "G:\Мой диск\Projects\MindStorm"
+git push origin main   # основной способ — CI
 ```
 
 Подробности — [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md).

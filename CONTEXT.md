@@ -41,6 +41,8 @@ G:\Мой диск\Projects\MindStorm
 
 Интерактивная доска для брейншторма в духе **Obsidian Canvas**. Формат данных — **JSON Canvas**. Хранение схем — **локально** (файл на диске + черновик в `localStorage`). GitHub OAuth / PAT **удалены** (июнь 2026).
 
+Интерфейс: **русский по умолчанию**, переключатель **RU / EN** в toolbar.
+
 ---
 
 ## Стек
@@ -48,7 +50,7 @@ G:\Мой диск\Projects\MindStorm
 - **Vite 6** + **React 19** + **TypeScript**
 - **Tailwind CSS v4** (`@tailwindcss/vite`)
 - **@xyflow/react** v12 (React Flow) — холст, карточки, связи, pan/zoom
-- Деплой: **GitHub Pages** (ветка `gh-pages`, скрипт `scripts/deploy-pages.ps1`)
+- Деплой: **GitHub Pages** (CI на `main`, запасной скрипт `scripts/deploy-pages.ps1` → ветка `gh-pages`)
 
 ---
 
@@ -70,25 +72,34 @@ MindStorm/
 │   └── deploy-pages.ps1
 ├── src/
 │   ├── App.tsx
+│   ├── main.tsx            ← LocaleProvider
+│   ├── i18n/
+│   │   ├── messages.ts     ← строки RU / EN
+│   │   ├── LocaleProvider.tsx
+│   │   └── localeStorage.ts
 │   ├── components/
 │   │   ├── MindCanvas.tsx  ← главный экран
-│   │   ├── Toolbar.tsx     ← toolbar, панели выделения
-│   │   ├── FileModals.tsx  ← сохранение (модалка fallback)
-│   │   ├── LogoMark.tsx
+│   │   ├── Toolbar.tsx     ← toolbar, RU/EN, панели выделения
+│   │   ├── FileModals.tsx
+│   │   ├── DemoSplash.tsx
+│   │   ├── Toast.tsx
 │   │   └── nodes/
 │   │       ├── CardNodes.tsx
-│   │       └── edgeHandles.tsx  ← 8 точек связи (2 на сторону)
+│   │       └── edgeHandles.tsx
 │   ├── context/
 │   │   └── canvasActions.ts
 │   ├── hooks/
 │   │   ├── useCanvasHistory.ts
-│   │   └── useRightClickMarquee.ts
+│   │   ├── useRightClickMarquee.ts
+│   │   ├── useCanvasShortcuts.ts
+│   │   └── useDebouncedPersist.ts
 │   ├── lib/
-│   │   ├── jsonCanvas.ts   ← JSON Canvas ↔ React Flow
-│   │   ├── demoCanvas.ts   ← DEMO_CANVAS
-│   │   ├── flowEdges.ts    ← связи, цвет от source, подписи
+│   │   ├── jsonCanvas.ts
+│   │   ├── demoCanvas.ts   ← getDemoCanvas('ru' | 'en')
+│   │   ├── flowEdges.ts
 │   │   ├── localBoardFile.ts
-│   │   └── colors.ts       ← 12 пресетных цветов
+│   │   ├── boardStorage.ts
+│   │   └── colors.ts
 │   └── types/
 │       └── jsonCanvas.ts
 ├── index.html
@@ -107,47 +118,55 @@ MindStorm/
 - **Delete / Backspace** — удалить выделенное (не в input/textarea).
 - **Колёсико** — только zoom (`panOnScroll={false}`, `zoomOnScroll`).
 - **Undo/Redo** — `useCanvasHistory` (Ctrl+Z / Ctrl+Shift+Z).
-- **ПКМ + рамка** — выделение нескольких узлов (`useRightClickMarquee`); группа выбирается только при касании **границы**.
-- **Сначала** — пустая схема (`EMPTY_CANVAS`); **↺ Демо** — `DEMO_CANVAS`.
+- **ПКМ + рамка** — выделение (`useRightClickMarquee`); группа — только при касании **границы**.
+- **Сначала** — подтверждение → пустая схема; **история не сбрасывается** → можно **Undo**.
+- **↺ Демо** — `getDemoCanvas(locale)` с анимацией появления.
 
 ### `Toolbar.tsx`
 
-- Крупные кнопки **Undo/Redo** (SVG-иконки).
-- **SelectionPanel** (справа сверху): при выборе карточки или группы — **название** и **12 цветов** (сетка 6×2).
-- **EdgeSelectionPanel** — подпись связи, удаление, перенаправление с концов.
+- **Undo/Redo** — крупные SVG-кнопки слева.
+- **Сначала** — акцентная кнопка (бирюзовая); **↺ Демо** — обычная.
+- **RU | EN** — переключатель языка (сохраняется в localStorage).
+- **SelectionPanel** — название + 12 цветов (6×2) для карточки или группы.
+- **EdgeSelectionPanel** — подпись связи, удаление, перенаправление.
+
+### `i18n/`
+
+- `messages.ts` — все UI-строки (`messagesRu`, `messagesEn`).
+- `LocaleProvider` — контекст `{ locale, m, setLocale, toggleLocale }`; хук `useLocale()`.
+- Новые строки UI добавлять **в оба языка** в `messages.ts`.
 
 ### `jsonCanvas.ts`
 
-- `canvasToFlow` / `flowToCanvas` — конвертация JSON Canvas ↔ React Flow.
-- Handles: `source-{side}-a|b` (2 точки на каждую сторону); в файле сохраняется `fromSide`/`toSide`.
-- Группы: `type: 'group'` → node `groupCard`, `zIndex: -1`.
-- Карточки: `zIndex: 1`; опциональное поле `label` у text-узлов (расширение MindStorm).
+- `canvasToFlow` / `flowToCanvas` — JSON Canvas ↔ React Flow.
+- Handles в runtime: `source-{side}-a|b`; в файле — `fromSide` / `toSide`.
+- Группы: `groupCard`, `zIndex: -1`. Карточки: `zIndex: 1`.
+- Расширение MindStorm: поле `label` у text-узлов (badge над карточкой).
 
 ### `demoCanvas.ts`
 
-- `DEMO_CANVAS` — демо-схема «запуск продукта»; тексты отражают актуальные возможности UI.
+- `getDemoCanvas('ru' | 'en')` — две полные демо-схемы.
+- `getDemoBoardName(locale)`, `demoFlowPresentation(locale)`, `demoStats(locale)`.
 
-### `localBoardFile.ts`
+### `localBoardFile.ts` / `boardStorage.ts`
 
-- Сохранение: `saveBoardToDisk()` — `showSaveFilePicker` (Chrome/Edge) или download в «Загрузки».
-- Загрузка: `readBoardFromFile()` — `.mindstorm`, legacy `.mindshtorm`, `.canvas`.
-- Legacy format id: `mindshtorm-board` — только при чтении.
+- Save/load `.mindstorm`, legacy `.mindshtorm`, `.canvas`.
+- Черновик: `mindstorm.canvas.v1`; имя доски: `mindstorm.boardName`.
+- Если черновика нет — старт с демо на языке из `mindstorm.locale.v1`.
 
 ### `CardNodes.tsx` + `edgeHandles.tsx`
 
-- `TextCardNode` — текст, badge с `label`, NodeResizer, 8 handles.
-- `GroupCardNode` — сплошная рамка (`border-2`), метка на верхней кромке, handles на группах.
-- `EdgeHandles` — по **2 точки связи** на каждой стороне (25% и 75%), все тип `source`, `ConnectionMode.Loose`.
+- **8 точек связи** (2 на сторону, 25% и 75%), `ConnectionMode.Loose`.
+- Группы: сплошная рамка, метка на верхней кромке.
 
 ### `flowEdges.ts`
 
-- Цвет ребра = цвет **исходной** карточки.
-- Стрелка на **target**; анимация dash к стрелке.
-- `connectionFromDragStart()` — начало связи = узел, откуда потянули.
+- Цвет ребра = цвет **source**-узла; стрелка на **target**; анимация к стрелке.
+- `connectionFromDragStart()` — направление от узла, откуда потянули.
 
 ### `colors.ts`
 
-- **12 пресетов** (`1`–`12`): красный … серый; `COLOR_IDS`, `swatchFill`, `swatchTitle`.
+- **12 пресетов** (`1`–`12`); названия цветов — из `messages.ts` (`m.colors`).
 
 ### `index.css` — порядок слоёв (критично!)
 
@@ -155,7 +174,7 @@ MindStorm/
 группы (-1) → рёбра (0) → карточки (1+) → selected card (2)
 ```
 
-Группа **никогда** не поднимается над рёбрами при выборе. Не ломать без проверки в UI.
+Группа **никогда** не поднимается над рёбрами. Не ломать без проверки в UI.
 
 ---
 
@@ -165,6 +184,8 @@ MindStorm/
 |------|------------|
 | `mindstorm.canvas.v1` | Черновик схемы (JSON Canvas) |
 | `mindstorm.boardName` | Имя текущей схемы в UI |
+| `mindstorm.locale.v1` | Язык UI: `ru` или `en` |
+| `mindstorm.demoWelcomeSeen.v1` | Splash демо уже показывали |
 
 Legacy (миграция при чтении): `mindshtorm.canvas.v1`, `mindshtorm.boardName`.
 
@@ -174,11 +195,12 @@ Legacy (миграция при чтении): `mindshtorm.canvas.v1`, `mindshto
 
 | Действие | Поведение |
 |----------|-----------|
-| **Сохранить** | Chrome/Edge: системный «Сохранить как»; иначе модалка → «Загрузки». Toast об успехе. |
-| **Загрузить** | Системный выбор файла. Toast «Открыто: …». |
-| **Сначала** | Пустая доска, сброс имени. |
-| **↺ Демо** | Загрузка `DEMO_CANVAS` с анимацией появления. |
-| **Клик по карточке/группе** | Панель: название + палитра цветов. |
+| **Сохранить** | Chrome/Edge: «Сохранить как»; иначе модалка → «Загрузки». Toast. |
+| **Загрузить** | Выбор файла. Toast «Открыто: …» / «Opened: …». |
+| **Сначала** (акцент) | Подтверждение → пустая доска; **Undo** вернёт прежнее. |
+| **↺ Демо** | Демо-схема на текущем языке + splash. |
+| **RU / EN** | Мгновенная смена языка UI; содержимое доски не меняется. |
+| **Клик по узлу** | Панель: название + цвет. |
 | **Клик по связи** | Панель: подпись, удаление. |
 
 ---
@@ -186,21 +208,23 @@ Legacy (миграция при чтении): `mindshtorm.canvas.v1`, `mindshto
 ## Сборка и деплой
 
 ```powershell
-# PATH должен содержать Node.js, например:
 $env:Path = "C:\Program Files\nodejs;" + $env:Path
+cd "G:\Мой диск\Projects\MindStorm"
 
 npm install
 npm run dev          # http://localhost:5173 (или 5174)
 npm run build
-npm run deploy:pages # push в gh-pages
+
+# Основной деплой — push в main (CI):
+git push origin main
 ```
 
-Git author для deploy-скрипта задаётся через **env vars** (не `git config`):
+Git author для deploy-скрипта — через **env vars** (не `git config`):
 
 - `GIT_AUTHOR_NAME=m11nic89co`
 - `GIT_AUTHOR_EMAIL=58000724+m11nic89co@users.noreply.github.com`
 
-После деплоя: жёсткое обновление сайта **Ctrl+Shift+R**.
+После деплоя: **Ctrl+Shift+R** на https://m11nic89co.github.io/mindstorm/
 
 CI: `.github/workflows/deploy.yml` — build + GitHub Pages при push в `main`.
 
@@ -208,12 +232,12 @@ CI: `.github/workflows/deploy.yml` — build + GitHub Pages при push в `main
 
 ## Соглашения для разработки
 
-1. **Язык UI** — русский.
+1. **Язык UI** — русский по умолчанию; все новые строки — в `src/i18n/messages.ts` (RU + EN).
 2. **Название продукта** — всегда **MindStorm**.
 3. **Минимальный diff** — не рефакторить без запроса.
 4. **Коммиты** — только по явной просьбе пользователя.
 5. **Не обновлять** `git config` глобально/локально.
-6. SolID/KISS, стиль как в соседних файлах.
+6. SOLID/KISS, стиль как в соседних файлах.
 
 ---
 
@@ -225,17 +249,8 @@ CI: `.github/workflows/deploy.yml` — build + GitHub Pages при push в `main
 | 2026-06 | GitHub save/load → **отменено**, только локальные файлы |
 | 2026-06 | z-index: группы под рёбрами |
 | 2026-06 | Переименование MindShtorm → **MindStorm**, `.mindstorm` |
-| 2026-06 | 12 цветов, 8 handles, панель выделения, Undo/Redo, «Сначала», обновлённое демо |
-
----
-
-## Что делать после переноса в новую папку
-
-1. Открыть проект в Cursor из **`MindStorm/`**.
-2. Убедиться, что прочитан **CONTEXT.md** (этот файл).
-3. `npm install && npm run dev`.
-4. При деплое — проверить путь и Node в PATH.
-5. Обновить закладки/пути в своих скриптах, если ссылались на `MindShtorm`.
+| 2026-06 | 12 цветов, 8 handles, панель выделения, Undo/Redo, «Сначала» + confirm |
+| 2026-06 | Локализация **RU/EN**, две демо-схемы; «Сначала» — accent-кнопка |
 
 ---
 

@@ -82,11 +82,11 @@ export function Toolbar({
             <span className="sm:hidden">📂</span>
             <span className="hidden sm:inline">{m.toolbar.load}</span>
           </ToolbarButton>
-          <ToolbarButton onClick={onNewBoard} title={m.toolbar.newBoardTitle}>
+          <ToolbarButton onClick={onNewBoard} title={m.toolbar.newBoardTitle} accent>
             <span className="sm:hidden">○</span>
             <span className="hidden sm:inline">{m.toolbar.newBoard}</span>
           </ToolbarButton>
-          <ToolbarButton onClick={onReset} title={m.toolbar.demoTitle} accent>
+          <ToolbarButton onClick={onReset} title={m.toolbar.demoTitle}>
             <span className="sm:hidden">↺</span>
             <span className="hidden sm:inline">{m.toolbar.demo}</span>
           </ToolbarButton>
