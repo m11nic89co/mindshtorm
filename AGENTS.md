@@ -15,8 +15,9 @@
 |--------|------|
 | Холст, UX | `src/components/MindCanvas.tsx` |
 | Слои групп/рёбер | `src/index.css` |
-| Save/load | `src/lib/localBoardFile.ts` |
-| Формат JSON Canvas | `src/lib/jsonCanvas.ts` |
+| Save/load / storage | `src/lib/localBoardFile.ts`, `src/lib/boardStorage.ts` |
+| Формат JSON Canvas | `src/lib/jsonCanvas.ts`, `src/lib/flowEdges.ts` |
+| Undo/redo | `src/hooks/useCanvasHistory.ts` |
 | Деплoy | `scripts/deploy-pages.ps1` |
 
 ## Не ломать

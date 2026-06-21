@@ -260,7 +260,6 @@ export function demoFlowPresentation(): {
   const edges = flow.edges.map((edge, index) => ({
     ...edge,
     selected: false,
-    animated: true,
     className: 'demo-edge-reveal',
     style: {
       ...edge.style,

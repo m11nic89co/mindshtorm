@@ -16,11 +16,20 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CanvasActionsContext } from '../context/canvasActions';
-import { BoardToast, SaveBoardModal } from './FileModals';
+import { SaveBoardModal } from './FileModals';
 import { DemoSplash, DEMO_WELCOME_SEEN_KEY } from './DemoSplash';
-import { canvasToFlow, createId, DEMO_CANVAS, flowToCanvas } from '../lib/jsonCanvas';
-import { applyConnection, FLOW_EDGE_STYLE, withAnimatedEdges } from '../lib/flowEdges';
+import { Toast } from './Toast';
+import { canvasToFlow, flowToCanvas } from '../lib/jsonCanvas';
+import { applyConnection, FLOW_EDGE_STYLE } from '../lib/flowEdges';
 import { DEMO_BOARD_NAME, demoFlowPresentation, demoStats } from '../lib/demoCanvas';
+import { createId } from '../lib/id';
+import {
+  CANVAS_STORAGE_KEY,
+  LEGACY_CANVAS_STORAGE_KEY,
+  loadStoredCanvas,
+  readBoardName,
+  writeBoardName,
+} from '../lib/boardStorage';
 import {
   BOARD_FILE_ACCEPT,
   SaveCancelledError,
@@ -33,44 +42,21 @@ import {
 import type { CardNodeData, JsonCanvas } from '../types/jsonCanvas';
 import { HintBar, SelectionPanel, Toolbar } from './Toolbar';
 import { GroupCardNode, TextCardNode } from './nodes/CardNodes';
-import { runHistoryShortcut, useCanvasHistory } from '../hooks/useCanvasHistory';
-
-const STORAGE_KEY = 'mindstorm.canvas.v1';
-const LEGACY_STORAGE_KEY = 'mindshtorm.canvas.v1';
-const BOARD_NAME_KEY = 'mindstorm.boardName';
-const LEGACY_BOARD_NAME_KEY = 'mindshtorm.boardName';
+import { useCanvasHistory } from '../hooks/useCanvasHistory';
+import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
+import { useDebouncedPersist } from '../hooks/useDebouncedPersist';
 
 const nodeTypes: NodeTypes = {
   textCard: TextCardNode,
   groupCard: GroupCardNode,
 };
 
-function loadInitialState(): { nodes: Node<CardNodeData>[]; edges: Edge[] } {
-  try {
-    let raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (raw) localStorage.setItem(STORAGE_KEY, raw);
-    }
-    if (raw) return toAnimatedFlow(JSON.parse(raw));
-  } catch {
-    /* use demo */
-  }
-  return toAnimatedFlow(DEMO_CANVAS);
-}
-
-function toAnimatedFlow(canvas: Parameters<typeof canvasToFlow>[0]) {
-  const flow = canvasToFlow(canvas);
-  return { nodes: flow.nodes, edges: withAnimatedEdges(flow.edges) };
-}
-
 function MindCanvasInner() {
-  const initial = useMemo(() => loadInitialState(), []);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<CardNodeData>>(initial.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
+  const initialFlow = useMemo(() => canvasToFlow(loadStoredCanvas()), []);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<CardNodeData>>(initialFlow.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow.edges);
   const { canUndo, canRedo, undo, redo, resetHistory } = useCanvasHistory(nodes, edges, setNodes, setEdges);
   const { screenToFlowPosition, fitView } = useReactFlow();
-  const saveTimer = useRef<number | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<number | undefined>(undefined);
 
@@ -80,13 +66,9 @@ function MindCanvasInner() {
   const [demoRevealing, setDemoRevealing] = useState(false);
   const [demoSplash, setDemoSplash] = useState(false);
   const demoStatsMemo = useMemo(() => demoStats(), []);
-  const [activeBoardName, setActiveBoardName] = useState<string | null>(() => {
-    const name = localStorage.getItem(BOARD_NAME_KEY) ?? localStorage.getItem(LEGACY_BOARD_NAME_KEY);
-    if (name && !localStorage.getItem(BOARD_NAME_KEY)) {
-      localStorage.setItem(BOARD_NAME_KEY, name);
-    }
-    return name;
-  });
+  const [activeBoardName, setActiveBoardName] = useState<string | null>(() => readBoardName());
+
+  useDebouncedPersist(nodes, edges);
 
   const selectedNode = nodes.find((n) => n.selected);
 
@@ -96,34 +78,17 @@ function MindCanvasInner() {
     toastTimer.current = window.setTimeout(() => setToastMessage(null), 4500);
   }, []);
 
-  const persist = useCallback((nextNodes: Node<CardNodeData>[], nextEdges: Edge[]) => {
-    window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(flowToCanvas(nextNodes, nextEdges)));
-    }, 400);
-  }, []);
+  useEffect(() => writeBoardName(activeBoardName), [activeBoardName]);
 
   useEffect(() => {
-    persist(nodes, edges);
-  }, [nodes, edges, persist]);
-
-  useEffect(() => {
-    if (activeBoardName) {
-      localStorage.setItem(BOARD_NAME_KEY, activeBoardName);
-    } else {
-      localStorage.removeItem(BOARD_NAME_KEY);
-    }
-  }, [activeBoardName]);
-
-  useEffect(() => {
-    return () => {
-      window.clearTimeout(toastTimer.current);
-    };
+    return () => window.clearTimeout(toastTimer.current);
   }, []);
 
   useEffect(() => {
     try {
-      if (localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY)) return;
+      if (localStorage.getItem(CANVAS_STORAGE_KEY) || localStorage.getItem(LEGACY_CANVAS_STORAGE_KEY)) {
+        return;
+      }
       if (localStorage.getItem(DEMO_WELCOME_SEEN_KEY)) return;
     } catch {
       return;
@@ -220,23 +185,27 @@ function MindCanvasInner() {
     [addTextCard, screenToFlowPosition],
   );
 
-  const loadCanvas = useCallback(
-    (canvas: JsonCanvas, name?: string) => {
-      const flow = toAnimatedFlow(canvas);
+  const applyFlow = useCallback(
+    (flow: { nodes: Node<CardNodeData>[]; edges: Edge[] }) => {
       setNodes(flow.nodes);
       setEdges(flow.edges);
       resetHistory(flow.nodes, flow.edges);
-      setActiveBoardName(name ?? null);
-      setLoadError(null);
     },
     [resetHistory, setEdges, setNodes],
   );
 
+  const loadCanvas = useCallback(
+    (canvas: JsonCanvas, name?: string) => {
+      applyFlow(canvasToFlow(canvas));
+      setActiveBoardName(name ?? null);
+      setLoadError(null);
+    },
+    [applyFlow],
+  );
+
   const onReset = useCallback(() => {
     const flow = demoFlowPresentation();
-    setNodes(flow.nodes);
-    setEdges(flow.edges);
-    resetHistory(flow.nodes, flow.edges);
+    applyFlow(flow);
     setActiveBoardName(DEMO_BOARD_NAME);
     setLoadError(null);
     setDemoRevealing(true);
@@ -246,10 +215,8 @@ function MindCanvasInner() {
       void fitView({ padding: 0.1, duration: 1100, maxZoom: 1.05 });
     }, 60);
 
-    window.setTimeout(() => {
-      setDemoRevealing(false);
-    }, 2800);
-  }, [fitView, resetHistory, setEdges, setNodes]);
+    window.setTimeout(() => setDemoRevealing(false), 2800);
+  }, [applyFlow, fitView]);
 
   const onSave = useCallback(async () => {
     const title = activeBoardName?.trim() || 'моя-схема';
@@ -291,24 +258,12 @@ function MindCanvasInner() {
     [loadCanvas, showToast],
   );
 
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (runHistoryShortcut(event, undo, redo)) return;
+  const deleteSelection = useCallback(() => {
+    setNodes((nds) => nds.filter((n) => !n.selected));
+    setEdges((eds) => eds.filter((e) => !e.selected));
+  }, [setEdges, setNodes]);
 
-      if (event.key === 'Delete' || event.key === 'Backspace') {
-        const active = document.activeElement?.tagName;
-        if (active === 'TEXTAREA' || active === 'INPUT') return;
-        setNodes((nds) => nds.filter((n) => !n.selected));
-        setEdges((eds) => eds.filter((e) => !e.selected));
-      }
-    },
-    [redo, setEdges, setNodes, undo],
-  );
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onKeyDown]);
+  useCanvasShortcuts({ undo, redo, onDeleteSelection: deleteSelection });
 
   const actions = useMemo(() => ({ updateNode }), [updateNode]);
   const currentCanvas = useMemo(() => flowToCanvas(nodes, edges), [nodes, edges]);
@@ -344,21 +299,10 @@ function MindCanvasInner() {
           groupCount={demoStatsMemo.groups}
         />
 
-        {toastMessage && (
-          <BoardToast message={toastMessage} onClose={() => setToastMessage(null)} />
-        )}
+        {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
 
         {loadError && (
-          <div className="pointer-events-auto absolute left-1/2 top-20 z-30 max-w-sm -translate-x-1/2 rounded-xl border border-red-400/30 bg-red-950/80 px-4 py-2 text-xs text-red-100 shadow-lg">
-            {loadError}
-            <button
-              type="button"
-              className="ml-2 text-red-200/70 underline"
-              onClick={() => setLoadError(null)}
-            >
-              Закрыть
-            </button>
-          </div>
+          <Toast message={loadError} variant="error" onClose={() => setLoadError(null)} />
         )}
 
         {selectedNode && (

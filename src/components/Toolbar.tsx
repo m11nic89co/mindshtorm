@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { LogoMark, boardStats } from './LogoMark';
 import { AUTHOR_NAME, REPO_URL } from '../lib/siteMeta';
+import { COLOR_IDS, swatchFill } from '../lib/colors';
 
 type ToolbarProps = {
   onAddText: () => void;
@@ -176,16 +177,6 @@ export function SelectionPanel({
   onColorChange: (color: string) => void;
   onLabelChange: (label: string) => void;
 }) {
-  const colors = ['1', '2', '3', '4', '5', '6'] as const;
-  const swatches: Record<string, string> = {
-    '1': '#f87171',
-    '2': '#fb923c',
-    '3': '#facc15',
-    '4': '#4ade80',
-    '5': '#22d3ee',
-    '6': '#c084fc',
-  };
-
   return (
     <div className="pointer-events-auto absolute right-2 top-20 z-20 flex w-44 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-2xl sm:right-4 sm:top-24 sm:w-48">
       {nodeType === 'group' && (
@@ -202,7 +193,7 @@ export function SelectionPanel({
       <div className="flex flex-col gap-1.5">
         <span className="text-[10px] font-medium uppercase tracking-wider text-white/40">Цвет</span>
         <div className="flex flex-wrap gap-1.5">
-          {colors.map((c) => (
+          {COLOR_IDS.map((c) => (
             <button
               key={c}
               type="button"
@@ -210,7 +201,7 @@ export function SelectionPanel({
               className={`h-6 w-6 rounded-full border-2 transition hover:scale-110 ${
                 color === c ? 'border-white scale-110' : 'border-transparent'
               }`}
-              style={{ background: swatches[c] }}
+              style={{ background: swatchFill(c) }}
               title={`Цвет ${c}`}
             />
           ))}

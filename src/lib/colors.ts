@@ -15,6 +15,8 @@ export const DEFAULT_CARD = {
   glow: 'rgba(99, 102, 241, 0.15)',
 };
 
+export const COLOR_IDS = ['1', '2', '3', '4', '5', '6'] as const satisfies readonly CanvasColor[];
+
 export function resolveColor(color?: CanvasColor) {
   if (!color) return DEFAULT_CARD;
   if (color in PRESET_COLORS) return PRESET_COLORS[color];
@@ -25,11 +27,6 @@ export function resolveColor(color?: CanvasColor) {
   };
 }
 
-export const COLOR_OPTIONS: { id: CanvasColor; label: string }[] = [
-  { id: '1', label: 'Красный' },
-  { id: '2', label: 'Оранжевый' },
-  { id: '3', label: 'Жёлтый' },
-  { id: '4', label: 'Зелёный' },
-  { id: '5', label: 'Голубой' },
-  { id: '6', label: 'Фиолетовый' },
-];
+export function swatchFill(color: CanvasColor): string {
+  return PRESET_COLORS[color]?.border ?? DEFAULT_CARD.border;
+}

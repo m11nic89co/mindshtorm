@@ -36,31 +36,6 @@ function ModalShell({ title, onClose, children }: ModalShellProps) {
   );
 }
 
-export function BoardToast({
-  message,
-  onClose,
-}: {
-  message: string;
-  onClose: () => void;
-}) {
-  return (
-    <div className="board-toast pointer-events-auto absolute inset-x-3 z-30 mx-auto max-w-md sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2">
-      <div className="flex items-start gap-2 rounded-xl border border-emerald-400/35 bg-emerald-950/90 px-4 py-3 text-sm text-emerald-50 shadow-xl backdrop-blur-xl">
-        <span className="text-base leading-none text-emerald-300">✓</span>
-        <p className="flex-1 leading-snug">{message}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="shrink-0 text-emerald-200/60 transition hover:text-emerald-100"
-          aria-label="Закрыть"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function SaveBoardModal({
   defaultName,
   canvas,

@@ -61,7 +61,7 @@ MindStorm/
 │   ├── DEVELOPMENT.md
 │   └── FILE_FORMAT.md
 ├── canvases/
-│   └── demo.canvas         ← демо-схема (JSON Canvas, без обёртки)
+│   └── README.md           ← референсные .canvas (опционально)
 ├── public/                 ← PWA, иконки, manifest
 ├── scripts/
 │   └── deploy-pages.ps1

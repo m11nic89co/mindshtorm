@@ -1,5 +1,4 @@
 import type { Edge, Node } from '@xyflow/react';
-import { PRESET_COLORS } from './colors';
 import type {
   CanvasSide,
   CardNodeData,
@@ -7,10 +6,7 @@ import type {
   JsonCanvasEdge,
   JsonCanvasNode,
 } from '../types/jsonCanvas';
-
-export function createId(prefix = 'node'): string {
-  return `${prefix}_${crypto.randomUUID().slice(0, 8)}`;
-}
+import { FLOW_EDGE_LABELS, normalizeFlowEdge, strokeForEdge } from './flowEdges';
 
 function sideToHandle(side: CanvasSide | undefined, role: 'source' | 'target'): string {
   const resolved = side ?? (role === 'source' ? 'right' : 'left');
@@ -24,13 +20,6 @@ function handleToSide(handleId: string | null | undefined, fallback: CanvasSide)
     return side;
   }
   return fallback;
-}
-
-function edgeStyle(color?: JsonCanvasEdge['color']) {
-  if (color && color in PRESET_COLORS) {
-    return { stroke: PRESET_COLORS[color].border, strokeWidth: 2 };
-  }
-  return { stroke: 'rgba(165, 180, 252, 0.55)', strokeWidth: 2 };
 }
 
 export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[]; edges: Edge[] } {
@@ -55,22 +44,19 @@ export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[];
     };
   });
 
-  const edges: Edge[] = (canvas.edges ?? []).map((edge) => ({
-    id: edge.id,
-    source: edge.fromNode,
-    target: edge.toNode,
-    sourceHandle: sideToHandle(edge.fromSide, 'source'),
-    targetHandle: sideToHandle(edge.toSide, 'target'),
-    label: edge.label,
-    type: 'smoothstep',
-    animated: true,
-    style: edgeStyle(edge.color),
-    labelStyle: { fill: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 500 },
-    labelBgStyle: { fill: 'rgba(11, 13, 20, 0.88)', fillOpacity: 1 },
-    labelBgPadding: [6, 10] as [number, number],
-    labelBgBorderRadius: 8,
-    data: { color: edge.color },
-  }));
+  const edges: Edge[] = (canvas.edges ?? []).map((edge) =>
+    normalizeFlowEdge({
+      id: edge.id,
+      source: edge.fromNode,
+      target: edge.toNode,
+      sourceHandle: sideToHandle(edge.fromSide, 'source'),
+      targetHandle: sideToHandle(edge.toSide, 'target'),
+      label: edge.label,
+      style: strokeForEdge(edge.color),
+      ...FLOW_EDGE_LABELS,
+      data: { color: edge.color },
+    }),
+  );
 
   return { nodes, edges };
 }
@@ -129,7 +115,7 @@ export function flowToCanvas(nodes: Node<CardNodeData>[], edges: Edge[]): JsonCa
 
 export function parseCanvasFile(content: string): JsonCanvas {
   const parsed = JSON.parse(content) as JsonCanvas;
-  if (!parsed || (typeof parsed !== 'object')) {
+  if (!parsed || typeof parsed !== 'object') {
     throw new Error('Неверный формат .canvas');
   }
   return parsed;

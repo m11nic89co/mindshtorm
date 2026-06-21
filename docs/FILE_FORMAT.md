@@ -72,4 +72,4 @@
 
 ## Пример в репозитории
 
-`canvases/demo.canvas` — чистый JSON Canvas (без обёртки), используется как `DEMO_CANVAS`.
+Демо-схема: `src/lib/demoCanvas.ts` → `DEMO_CANVAS` (встроена в код).
