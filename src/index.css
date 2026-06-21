@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #0b0d14;
+}
+
+.mind-canvas .react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.mind-canvas .react-flow__node-groupCard {
+  z-index: 0 !important;
+}
+
+.mind-canvas .react-flow__node-textCard {
+  z-index: 1 !important;
+}
+
+.mind-canvas .react-flow__node.selected {
+  z-index: 2 !important;
+}

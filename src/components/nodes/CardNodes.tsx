@@ -1,0 +1,118 @@
+import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
+import { useEffect, useRef, useState } from 'react';
+import { useCanvasActions } from '../../context/canvasActions';
+import { resolveColor } from '../../lib/colors';
+import type { CardNodeData } from '../../types/jsonCanvas';
+
+const sides = [
+  { id: 'top', position: Position.Top },
+  { id: 'right', position: Position.Right },
+  { id: 'bottom', position: Position.Bottom },
+  { id: 'left', position: Position.Left },
+] as const;
+
+type TextCardProps = NodeProps<Node<CardNodeData>>;
+
+export function TextCardNode({ id, data, selected }: TextCardProps) {
+  const { updateNode } = useCanvasActions();
+  const [editing, setEditing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const palette = resolveColor(data.color);
+
+  useEffect(() => {
+    if (editing) textareaRef.current?.focus();
+  }, [editing]);
+
+  return (
+    <div
+      className={`group relative h-full w-full rounded-2xl border backdrop-blur-xl transition-all duration-200 ${
+        selected ? 'ring-2 ring-indigo-400/70 shadow-[0_0_40px_-8px_rgba(99,102,241,0.55)]' : ''
+      }`}
+      style={{
+        background: palette.bg,
+        borderColor: palette.border,
+        boxShadow: selected ? undefined : `0 8px 32px -12px ${palette.glow}`,
+      }}
+      onDoubleClick={() => setEditing(true)}
+    >
+      {sides.map(({ id: side, position }) => (
+        <Handle
+          key={side}
+          id={`source-${side}`}
+          type="source"
+          position={position}
+          className="!h-2.5 !w-2.5 !border-2 !border-white/30 !bg-indigo-400 opacity-0 transition-opacity group-hover:opacity-100"
+        />
+      ))}
+      {sides.map(({ id: side, position }) => (
+        <Handle
+          key={`t-${side}`}
+          id={`target-${side}`}
+          type="target"
+          position={position}
+          className="!h-2.5 !w-2.5 !border-2 !border-white/30 !bg-violet-400 opacity-0 transition-opacity group-hover:opacity-100"
+        />
+      ))}
+
+      <div className="flex h-full flex-col p-4">
+        {editing ? (
+          <textarea
+            ref={textareaRef}
+            value={data.text ?? ''}
+            onChange={(e) => updateNode(id, { text: e.target.value })}
+            onBlur={() => setEditing(false)}
+            className="h-full w-full resize-none bg-transparent text-sm leading-relaxed text-white/90 outline-none placeholder:text-white/35"
+            placeholder="Markdown-текст..."
+          />
+        ) : (
+          <div className="prose-card whitespace-pre-wrap text-sm leading-relaxed text-white/88">
+            {(data.text ?? 'Новая идея').split('\n').map((line: string, i: number) => {
+              if (line.startsWith('# ')) {
+                return (
+                  <h1 key={i} className="mb-2 text-base font-semibold text-white">
+                    {line.slice(2)}
+                  </h1>
+                );
+              }
+              if (line.startsWith('## ')) {
+                return (
+                  <h2 key={i} className="mb-1.5 text-sm font-semibold text-white/95">
+                    {line.slice(3)}
+                  </h2>
+                );
+              }
+              return (
+                <p key={i} className="mb-1 text-white/75">
+                  {line || '\u00A0'}
+                </p>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function GroupCardNode({ data, selected }: TextCardProps) {
+  const palette = resolveColor(data.color);
+
+  return (
+    <div
+      className={`h-full w-full rounded-3xl border-2 border-dashed backdrop-blur-sm transition-all ${
+        selected ? 'ring-2 ring-cyan-400/50' : ''
+      }`}
+      style={{
+        background: `${palette.bg}`,
+        borderColor: palette.border,
+      }}
+    >
+      <div
+        className="absolute -top-3 left-4 rounded-full px-3 py-0.5 text-xs font-medium text-white/80 backdrop-blur-md"
+        style={{ background: palette.border }}
+      >
+        {data.label ?? 'Группа'}
+      </div>
+    </div>
+  );
+}
