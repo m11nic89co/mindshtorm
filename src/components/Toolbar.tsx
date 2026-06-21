@@ -47,7 +47,7 @@ export function Toolbar({
             <span className="sm:hidden">📂</span>
             <span className="hidden sm:inline">Загрузить</span>
           </ToolbarButton>
-          <ToolbarButton onClick={onReset} title="Сбросить к демо">
+          <ToolbarButton onClick={onReset} title="Загрузить демо-схему запуска MindStorm" accent>
             <span className="sm:hidden">↺</span>
             <span className="hidden sm:inline">↺ Демо</span>
           </ToolbarButton>
@@ -71,17 +71,23 @@ function ToolbarButton({
   children,
   onClick,
   title,
+  accent = false,
 }: {
   children: ReactNode;
   onClick: () => void;
   title: string;
+  accent?: boolean;
 }) {
   return (
     <button
       type="button"
       title={title}
       onClick={onClick}
-      className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white active:scale-95 sm:px-3"
+      className={`shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium transition active:scale-95 sm:px-3 ${
+        accent
+          ? 'border border-cyan-400/25 bg-cyan-400/10 text-cyan-100 hover:border-cyan-400/40 hover:bg-cyan-400/20 hover:text-white'
+          : 'text-white/80 hover:bg-white/10 hover:text-white'
+      }`}
     >
       {children}
     </button>

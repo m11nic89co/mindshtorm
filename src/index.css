@@ -61,3 +61,84 @@ body {
 .mind-canvas .react-flow__resize-control.handle {
   z-index: 3;
 }
+
+/* --- Демо: появление карточек и связей --- */
+@keyframes demo-node-in {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes demo-edge-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes demo-splash-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes demo-splash-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes demo-splash-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 24px rgba(34, 211, 238, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(34, 211, 238, 0.35);
+  }
+}
+
+.mind-canvas--demo-reveal .react-flow__node.demo-reveal {
+  animation: demo-node-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.mind-canvas--demo-reveal .react-flow__edge.demo-edge-reveal {
+  animation: demo-edge-in 0.7s ease-out backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.demo-splash {
+  animation: demo-splash-in 0.45s ease-out;
+}
+
+.demo-splash-card {
+  animation: demo-splash-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.demo-splash-glow {
+  animation: demo-splash-glow 2s ease-in-out infinite;
+}
+
+.demo-splash[data-exiting='true'] .demo-splash-card {
+  animation: demo-splash-out 0.35s ease-in forwards;
+}

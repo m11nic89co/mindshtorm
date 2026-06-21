@@ -18,7 +18,9 @@ import '@xyflow/react/dist/style.css';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CanvasActionsContext } from '../context/canvasActions';
 import { BoardToast, SaveBoardModal } from './FileModals';
+import { DemoSplash } from './DemoSplash';
 import { canvasToFlow, createId, DEMO_CANVAS, flowToCanvas } from '../lib/jsonCanvas';
+import { DEMO_BOARD_NAME, demoFlowPresentation, demoStats } from '../lib/demoCanvas';
 import {
   BOARD_FILE_ACCEPT,
   SaveCancelledError,
@@ -60,7 +62,7 @@ function MindCanvasInner() {
   const initial = useMemo(() => loadInitialState(), []);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<CardNodeData>>(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
   const saveTimer = useRef<number | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<number | undefined>(undefined);
@@ -68,6 +70,9 @@ function MindCanvasInner() {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [demoRevealing, setDemoRevealing] = useState(false);
+  const [demoSplash, setDemoSplash] = useState(false);
+  const demoStatsMemo = useMemo(() => demoStats(), []);
   const [activeBoardName, setActiveBoardName] = useState<string | null>(() => {
     const name = localStorage.getItem(BOARD_NAME_KEY) ?? localStorage.getItem(LEGACY_BOARD_NAME_KEY);
     if (name && !localStorage.getItem(BOARD_NAME_KEY)) {
@@ -211,9 +216,24 @@ function MindCanvasInner() {
   );
 
   const onReset = useCallback(() => {
-    loadCanvas(DEMO_CANVAS);
-    setActiveBoardName(null);
-  }, [loadCanvas]);
+    const flow = demoFlowPresentation();
+    setNodes(flow.nodes);
+    setEdges(flow.edges);
+    setActiveBoardName(DEMO_BOARD_NAME);
+    setLoadError(null);
+    setDemoRevealing(true);
+    setDemoSplash(true);
+
+    window.setTimeout(() => {
+      void fitView({ padding: 0.1, duration: 1100, maxZoom: 1.05 });
+    }, 60);
+
+    window.setTimeout(() => {
+      setDemoRevealing(false);
+    }, 2800);
+
+    showToast('Демо загружено — исследуйте схему запуска MindStorm');
+  }, [fitView, setEdges, setNodes, showToast]);
 
   const onSave = useCallback(async () => {
     const title = activeBoardName?.trim() || 'моя-схема';
@@ -295,6 +315,14 @@ function MindCanvasInner() {
           <BoardToast message={toastMessage} onClose={() => setToastMessage(null)} />
         )}
 
+        <DemoSplash
+          visible={demoSplash}
+          onDone={() => setDemoSplash(false)}
+          nodeCount={demoStatsMemo.nodes}
+          edgeCount={demoStatsMemo.edges}
+          groupCount={demoStatsMemo.groups}
+        />
+
         {loadError && (
           <div className="pointer-events-auto absolute left-1/2 top-20 z-30 max-w-sm -translate-x-1/2 rounded-xl border border-red-400/30 bg-red-950/80 px-4 py-2 text-xs text-red-100 shadow-lg">
             {loadError}
@@ -351,7 +379,7 @@ function MindCanvasInner() {
             style: { stroke: 'rgba(165, 180, 252, 0.55)', strokeWidth: 2 },
           }}
           proOptions={{ hideAttribution: true }}
-          className="mind-canvas"
+          className={`mind-canvas${demoRevealing ? ' mind-canvas--demo-reveal' : ''}`}
         >
           <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="rgba(255,255,255,0.06)" />
           <Controls

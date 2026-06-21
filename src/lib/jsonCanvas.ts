@@ -1,4 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
+import { PRESET_COLORS } from './colors';
 import type {
   CanvasSide,
   CardNodeData,
@@ -23,6 +24,13 @@ function handleToSide(handleId: string | null | undefined, fallback: CanvasSide)
     return side;
   }
   return fallback;
+}
+
+function edgeStyle(color?: JsonCanvasEdge['color']) {
+  if (color && color in PRESET_COLORS) {
+    return { stroke: PRESET_COLORS[color].border, strokeWidth: 2 };
+  }
+  return { stroke: 'rgba(165, 180, 252, 0.55)', strokeWidth: 2 };
 }
 
 export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[]; edges: Edge[] } {
@@ -56,6 +64,11 @@ export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[];
     label: edge.label,
     type: 'smoothstep',
     animated: false,
+    style: edgeStyle(edge.color),
+    labelStyle: { fill: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 500 },
+    labelBgStyle: { fill: 'rgba(11, 13, 20, 0.88)', fillOpacity: 1 },
+    labelBgPadding: [6, 10] as [number, number],
+    labelBgBorderRadius: 8,
     data: { color: edge.color },
   }));
 
@@ -124,63 +137,4 @@ export function parseCanvasFile(content: string): JsonCanvas {
 
 export const EMPTY_CANVAS: JsonCanvas = { nodes: [], edges: [] };
 
-export const DEMO_CANVAS: JsonCanvas = {
-  nodes: [
-    {
-      id: 'idea',
-      type: 'text',
-      x: 120,
-      y: 180,
-      width: 280,
-      height: 140,
-      color: '5',
-      text: '# Главная идея\n\nДважды кликните по холсту — новая карточка.\nПеретаскивайте от точки — связь.',
-    },
-    {
-      id: 'branch_a',
-      type: 'text',
-      x: 520,
-      y: 80,
-      width: 240,
-      height: 110,
-      color: '4',
-      text: '## Ветка A\nПервый вариант развития',
-    },
-    {
-      id: 'branch_b',
-      type: 'text',
-      x: 520,
-      y: 260,
-      width: 240,
-      height: 110,
-      color: '6',
-      text: '## Ветка B\nАльтернативный путь',
-    },
-    {
-      id: 'group_1',
-      type: 'group',
-      x: 90,
-      y: 140,
-      width: 720,
-      height: 280,
-      color: '5',
-      label: 'Брейншторм',
-    },
-  ],
-  edges: [
-    {
-      id: 'e1',
-      fromNode: 'idea',
-      fromSide: 'right',
-      toNode: 'branch_a',
-      toSide: 'left',
-    },
-    {
-      id: 'e2',
-      fromNode: 'idea',
-      fromSide: 'right',
-      toNode: 'branch_b',
-      toSide: 'left',
-    },
-  ],
-};
+export { DEMO_CANVAS, DEMO_BOARD_NAME } from './demoCanvas';
