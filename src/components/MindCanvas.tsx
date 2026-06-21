@@ -294,18 +294,27 @@ function MindCanvasInner() {
 
 
 
-  const onPaneDoubleClick = useCallback(
+  const paneClickRef = useRef<{ time: number; x: number; y: number } | null>(null);
 
+  const onPaneClick = useCallback(
     (event: React.MouseEvent) => {
+      const now = Date.now();
+      const prev = paneClickRef.current;
 
-      const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+      if (
+        prev &&
+        now - prev.time < 400 &&
+        Math.hypot(event.clientX - prev.x, event.clientY - prev.y) < 12
+      ) {
+        paneClickRef.current = null;
+        const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+        addTextCard({ x: position.x - 130, y: position.y - 60 });
+        return;
+      }
 
-      addTextCard({ x: position.x - 130, y: position.y - 60 });
-
+      paneClickRef.current = { time: now, x: event.clientX, y: event.clientY };
     },
-
     [addTextCard, screenToFlowPosition],
-
   );
 
 
@@ -444,9 +453,7 @@ function MindCanvasInner() {
           onEdgesChange={onEdgesChange}
 
           onConnect={onConnect}
-
-          onDoubleClick={onPaneDoubleClick}
-
+          onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
 
           fitView

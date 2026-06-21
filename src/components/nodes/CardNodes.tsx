@@ -49,7 +49,10 @@ export function TextCardNode({ id, data, selected }: TextCardProps) {
           borderColor: palette.border,
           boxShadow: selected ? undefined : `0 8px 32px -12px ${palette.glow}`,
         }}
-        onDoubleClick={() => setEditing(true)}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          setEditing(true);
+        }}
       >
         {sides.map(({ id: side, position }) => (
           <Handle
@@ -141,6 +144,7 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
           background: `${palette.bg}`,
           borderColor: palette.border,
         }}
+        onDoubleClick={(e) => e.stopPropagation()}
       >
         {editingLabel ? (
           <input
