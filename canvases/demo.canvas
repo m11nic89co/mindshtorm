@@ -1,0 +1,60 @@
+{
+  "nodes": [
+    {
+      "id": "idea",
+      "type": "text",
+      "x": 120,
+      "y": 180,
+      "width": 280,
+      "height": 140,
+      "color": "5",
+      "text": "# Главная идея\n\nСхемы хранятся в GitHub в папке canvases/"
+    },
+    {
+      "id": "branch_a",
+      "type": "text",
+      "x": 520,
+      "y": 80,
+      "width": 240,
+      "height": 110,
+      "color": "4",
+      "text": "## Ветка A\nПервый вариант"
+    },
+    {
+      "id": "branch_b",
+      "type": "text",
+      "x": 520,
+      "y": 260,
+      "width": 240,
+      "height": 110,
+      "color": "6",
+      "text": "## Ветка B\nАльтернатива"
+    },
+    {
+      "id": "group_1",
+      "type": "group",
+      "x": 90,
+      "y": 140,
+      "width": 720,
+      "height": 280,
+      "color": "5",
+      "label": "Брейншторм"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "fromNode": "idea",
+      "fromSide": "right",
+      "toNode": "branch_a",
+      "toSide": "left"
+    },
+    {
+      "id": "e2",
+      "fromNode": "idea",
+      "fromSide": "right",
+      "toNode": "branch_b",
+      "toSide": "left"
+    }
+  ]
+}

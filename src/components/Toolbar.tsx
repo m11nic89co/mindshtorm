@@ -4,21 +4,25 @@ import { LogoMark, boardStats } from './LogoMark';
 type ToolbarProps = {
   onAddText: () => void;
   onAddGroup: () => void;
-  onImport: () => void;
-  onExport: () => void;
+  onSaveToGitHub: () => void;
+  onLoadFromGitHub: () => void;
+  onOpenSettings: () => void;
   onReset: () => void;
   nodeCount: number;
   edgeCount: number;
+  activeBoardName?: string | null;
 };
 
 export function Toolbar({
   onAddText,
   onAddGroup,
-  onImport,
-  onExport,
+  onSaveToGitHub,
+  onLoadFromGitHub,
+  onOpenSettings,
   onReset,
   nodeCount,
   edgeCount,
+  activeBoardName,
 }: ToolbarProps) {
   return (
     <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center p-2 pt-[max(0.5rem,env(safe-area-inset-top))] sm:p-4">
@@ -37,13 +41,16 @@ export function Toolbar({
           <span className="sm:hidden">◻</span>
           <span className="hidden sm:inline">◻ Группа</span>
         </ToolbarButton>
-        <ToolbarButton onClick={onImport} title="Импорт .canvas">
+        <ToolbarButton onClick={onSaveToGitHub} title="Сохранить схему в GitHub">
           <span className="sm:hidden">↑</span>
-          <span className="hidden sm:inline">↑ Импорт</span>
+          <span className="hidden sm:inline">↑ В GitHub</span>
         </ToolbarButton>
-        <ToolbarButton onClick={onExport} title="Экспорт .canvas">
+        <ToolbarButton onClick={onLoadFromGitHub} title="Открыть список схем из GitHub">
           <span className="sm:hidden">↓</span>
-          <span className="hidden sm:inline">↓ Экспорт</span>
+          <span className="hidden sm:inline">↓ Из GitHub</span>
+        </ToolbarButton>
+        <ToolbarButton onClick={onOpenSettings} title="Настройки GitHub-токена">
+          <span>⚙</span>
         </ToolbarButton>
         <ToolbarButton onClick={onReset} title="Сбросить к демо">
           <span className="sm:hidden">↺</span>
@@ -55,6 +62,9 @@ export function Toolbar({
           className="ml-2 hidden border-l border-white/10 pl-3 text-[11px] text-white/35 sm:block"
           title="Сколько карточек и линий на доске"
         >
+          {activeBoardName ? (
+            <span className="text-white/50">{activeBoardName} · </span>
+          ) : null}
           {boardStats(nodeCount, edgeCount)}
         </div>
       </div>
