@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { LogoMark, boardStats } from './LogoMark';
 
 type ToolbarProps = {
   onAddText: () => void;
@@ -23,15 +24,8 @@ export function Toolbar({
     <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center p-2 pt-[max(0.5rem,env(safe-area-inset-top))] sm:p-4">
       <div className="pointer-events-auto flex max-w-full items-center gap-1 rounded-2xl border border-white/10 bg-white/5 px-2 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-2xl sm:gap-2 sm:px-3">
         <div className="mr-1 flex shrink-0 items-center gap-2 border-r border-white/10 pr-2 sm:mr-2 sm:pr-3">
-          <img
-            src={`${import.meta.env.BASE_URL}icon-192.png`}
-            alt="MindShtorm"
-            className="h-9 w-9 rounded-xl shadow-lg ring-1 ring-white/15"
-          />
-          <div className="hidden min-w-0 sm:block">
-            <div className="text-sm font-semibold text-white">MindShtorm</div>
-            <div className="text-[10px] text-white/45">JSON Canvas · Obsidian</div>
-          </div>
+          <LogoMark />
+          <div className="text-sm font-semibold tracking-tight text-white">MindShtorm</div>
         </div>
 
         <div className="flex max-w-[calc(100vw-6rem)] items-center gap-1 overflow-x-auto sm:gap-2">
@@ -57,8 +51,11 @@ export function Toolbar({
         </ToolbarButton>
         </div>
 
-        <div className="ml-2 hidden border-l border-white/10 pl-3 text-xs text-white/40 sm:block">
-          {nodeCount} узлов · {edgeCount} связей
+        <div
+          className="ml-2 hidden border-l border-white/10 pl-3 text-[11px] text-white/35 sm:block"
+          title="Сколько карточек и линий на доске"
+        >
+          {boardStats(nodeCount, edgeCount)}
         </div>
       </div>
     </header>
