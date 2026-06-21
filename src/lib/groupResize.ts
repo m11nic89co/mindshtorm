@@ -1,0 +1,124 @@
+import type { Node } from '@xyflow/react';
+import type { CardNodeData } from '../types/jsonCanvas';
+
+export type FlowRect = { x: number; y: number; w: number; h: number };
+
+export type GroupResizeChildSnapshot = {
+  id: string;
+  relX: number;
+  relY: number;
+  relW: number;
+  relH: number;
+};
+
+export type GroupResizeSnapshot = {
+  groupId: string;
+  groupX: number;
+  groupY: number;
+  groupW: number;
+  groupH: number;
+  children: GroupResizeChildSnapshot[];
+};
+
+const MIN_TEXT_WIDTH = 160;
+const MIN_TEXT_HEIGHT = 72;
+
+export function nodeSize(node: Node<CardNodeData>): { w: number; h: number } {
+  return {
+    w: Number(node.width ?? node.measured?.width ?? node.style?.width ?? 260),
+    h: Number(node.height ?? node.measured?.height ?? node.style?.height ?? 120),
+  };
+}
+
+export function isGroupNode(node: Node<CardNodeData>): boolean {
+  return node.type === 'groupCard' || node.data.canvasType === 'group';
+}
+
+export function isTextCardNode(node: Node<CardNodeData>): boolean {
+  return node.data.canvasType === 'text' || node.type === 'textCard';
+}
+
+export function nodeCenter(node: Node<CardNodeData>): { x: number; y: number } {
+  const { w, h } = nodeSize(node);
+  return { x: node.position.x + w / 2, y: node.position.y + h / 2 };
+}
+
+/** Центр карточки внутри прямоугольника группы. */
+export function centerInsideGroup(card: Node<CardNodeData>, group: FlowRect): boolean {
+  const { x: cx, y: cy } = nodeCenter(card);
+  return cx >= group.x && cx <= group.x + group.w && cy >= group.y && cy <= group.y + group.h;
+}
+
+export function groupFlowRect(group: Node<CardNodeData>): FlowRect {
+  const { w, h } = nodeSize(group);
+  return { x: group.position.x, y: group.position.y, w, h };
+}
+
+export function textCardsInsideGroup(
+  group: Node<CardNodeData>,
+  nodes: Node<CardNodeData>[],
+): Node<CardNodeData>[] {
+  const rect = groupFlowRect(group);
+  return nodes.filter(
+    (node) => node.id !== group.id && isTextCardNode(node) && centerInsideGroup(node, rect),
+  );
+}
+
+export function createGroupResizeSnapshot(
+  group: Node<CardNodeData>,
+  nodes: Node<CardNodeData>[],
+): GroupResizeSnapshot {
+  const { w: groupW, h: groupH } = nodeSize(group);
+  const groupX = group.position.x;
+  const groupY = group.position.y;
+  const safeW = groupW > 0 ? groupW : 1;
+  const safeH = groupH > 0 ? groupH : 1;
+
+  const children = textCardsInsideGroup(group, nodes).map((child) => {
+    const { w, h } = nodeSize(child);
+    return {
+      id: child.id,
+      relX: (child.position.x - groupX) / safeW,
+      relY: (child.position.y - groupY) / safeH,
+      relW: w / safeW,
+      relH: h / safeH,
+    };
+  });
+
+  return {
+    groupId: group.id,
+    groupX,
+    groupY,
+    groupW: safeW,
+    groupH: safeH,
+    children,
+  };
+}
+
+export function applyGroupResizeToNodes(
+  nodes: Node<CardNodeData>[],
+  snapshot: GroupResizeSnapshot,
+  next: { x: number; y: number; width: number; height: number },
+): Node<CardNodeData>[] {
+  const gw2 = Math.max(1, next.width);
+  const gh2 = Math.max(1, next.height);
+  const childById = new Map(snapshot.children.map((child) => [child.id, child]));
+
+  return nodes.map((node) => {
+    const child = childById.get(node.id);
+    if (!child) return node;
+
+    const newW = Math.max(MIN_TEXT_WIDTH, child.relW * gw2);
+    const newH = Math.max(MIN_TEXT_HEIGHT, child.relH * gh2);
+    const newX = next.x + child.relX * gw2;
+    const newY = next.y + child.relY * gh2;
+
+    return {
+      ...node,
+      position: { x: newX, y: newY },
+      width: newW,
+      height: newH,
+      style: { ...node.style, width: newW, height: newH },
+    };
+  });
+}

@@ -26,7 +26,17 @@ import { applyConnection, connectionFromDragStart, FLOW_EDGE_STYLE, strokeForNod
 import { useLocale } from '../i18n/LocaleProvider';
 import { readLocale } from '../i18n/localeStorage';
 import { messagesFor } from '../i18n/messages';
-import { getDemoBoardName, demoFlowPresentation, demoStats, isDemoBoardName } from '../lib/demoCanvas';
+import {
+  applyGroupResizeToNodes,
+  createGroupResizeSnapshot,
+  type GroupResizeSnapshot,
+} from '../lib/groupResize';
+import {
+  getDemoBoardName,
+  demoFlowPresentation,
+  demoStats,
+  isDemoBoardName,
+} from '../lib/demoCanvas';
 import {
   materializeEdgeLocale,
   materializeNodeLocale,
@@ -94,6 +104,7 @@ function MindCanvasInner() {
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
   const connectStartNodeRef = useRef<string | null>(null);
+  const groupResizeSnapshotRef = useRef<GroupResizeSnapshot | null>(null);
   nodesRef.current = nodes;
   edgesRef.current = edges;
   const toastTimer = useRef<number | undefined>(undefined);
@@ -126,6 +137,40 @@ function MindCanvasInner() {
     commitNow();
     persistCanvas(nodesRef.current, edgesRef.current);
   }, [commitNow]);
+
+  const onGroupResizeStart = useCallback((groupId: string) => {
+    dragPausedRef.current = true;
+    const group = nodesRef.current.find((n) => n.id === groupId);
+    if (!group) return;
+    groupResizeSnapshotRef.current = createGroupResizeSnapshot(group, nodesRef.current);
+  }, []);
+
+  const onGroupResize = useCallback(
+    (groupId: string, params: { x: number; y: number; width: number; height: number }) => {
+      const snapshot = groupResizeSnapshotRef.current;
+      if (!snapshot || snapshot.groupId !== groupId) return;
+      const group = nodesRef.current.find((n) => n.id === groupId);
+      setNodes((nds) =>
+        applyGroupResizeToNodes(nds, snapshot, {
+          x: params.x ?? group?.position.x ?? snapshot.groupX,
+          y: params.y ?? group?.position.y ?? snapshot.groupY,
+          width: params.width,
+          height: params.height,
+        }),
+      );
+    },
+    [setNodes],
+  );
+
+  const onGroupResizeEnd = useCallback(
+    (_groupId: string) => {
+      dragPausedRef.current = false;
+      groupResizeSnapshotRef.current = null;
+      commitNow();
+      persistCanvas(nodesRef.current, edgesRef.current);
+    },
+    [commitNow],
+  );
 
   const showToast = useCallback((message: string) => {
     window.clearTimeout(toastTimer.current);
@@ -444,7 +489,15 @@ function MindCanvasInner() {
 
   useCanvasShortcuts({ undo, redo, onDeleteSelection: deleteSelection });
 
-  const actions = useMemo(() => ({ updateNode }), [updateNode]);
+  const actions = useMemo(
+    () => ({
+      updateNode,
+      onGroupResizeStart,
+      onGroupResize,
+      onGroupResizeEnd,
+    }),
+    [updateNode, onGroupResizeStart, onGroupResize, onGroupResizeEnd],
+  );
 
   return (
     <CanvasActionsContext.Provider value={actions}>

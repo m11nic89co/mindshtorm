@@ -107,7 +107,7 @@ export function TextCardNode({ id, data, selected }: TextCardProps) {
 }
 
 export function GroupCardNode({ id, data, selected }: TextCardProps) {
-  const { updateNode } = useCanvasActions();
+  const { updateNode, onGroupResizeStart, onGroupResize, onGroupResizeEnd } = useCanvasActions();
   const { m } = useLocale();
   const [editingLabel, setEditingLabel] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -128,6 +128,9 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
         color="#22d3ee"
         handleClassName="!h-3 !w-3 !rounded-full !border-2 !border-white/50 !bg-cyan-400 !shadow-[0_0_8px_rgba(34,211,238,0.55)]"
         lineClassName="!border-cyan-400/45"
+        onResizeStart={() => onGroupResizeStart?.(id)}
+        onResize={(_, params) => onGroupResize?.(id, params)}
+        onResizeEnd={() => onGroupResizeEnd?.(id)}
       />
       <div className="group relative h-full w-full">
         <div
