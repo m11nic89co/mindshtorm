@@ -63,8 +63,12 @@ export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[];
 }
 
 function flowNodeToCanvas(node: Node<CardNodeData>): JsonCanvasNode {
-  const width = Math.round(Number(node.style?.width ?? node.measured?.width ?? 260));
-  const height = Math.round(Number(node.style?.height ?? node.measured?.height ?? 120));
+  const width = Math.round(
+    Number(node.width ?? node.style?.width ?? node.measured?.width ?? 260),
+  );
+  const height = Math.round(
+    Number(node.height ?? node.style?.height ?? node.measured?.height ?? 120),
+  );
   const base = {
     id: node.id,
     x: Math.round(node.position.x),

@@ -43,3 +43,7 @@ body {
 .mind-canvas .react-flow__node.selected {
   z-index: 2 !important;
 }
+
+.mind-canvas .react-flow__resize-control.handle {
+  z-index: 3;
+}

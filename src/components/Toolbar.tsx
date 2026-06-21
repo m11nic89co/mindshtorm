@@ -88,9 +88,9 @@ export function HintBar() {
     <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:p-4">
       <div className="rounded-full border border-white/8 bg-black/25 px-3 py-1.5 text-[10px] text-white/45 backdrop-blur-xl sm:px-4 sm:py-2 sm:text-[11px]">
         <span className="hidden sm:inline">
-          Двойной клик — карточка · Перетащите от точки — связь · Delete — удалить · Колёсико — масштаб
+          Двойной клик — карточка · Уголки — размер · Перетащите от точки — связь · Delete — удалить · Колёсико — масштаб
         </span>
-        <span className="sm:hidden">Тап×2 — карточка · Тяните от точки — связь · Щипок — масштаб</span>
+        <span className="sm:hidden">Тап×2 — карточка · Уголки — размер · Щипок — масштаб</span>
       </div>
     </footer>
   );
