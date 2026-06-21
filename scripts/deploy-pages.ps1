@@ -4,6 +4,11 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
 
+$env:GIT_AUTHOR_NAME = "m11nic89co"
+$env:GIT_COMMITTER_NAME = "m11nic89co"
+$env:GIT_AUTHOR_EMAIL = "58000724+m11nic89co@users.noreply.github.com"
+$env:GIT_COMMITTER_EMAIL = "58000724+m11nic89co@users.noreply.github.com"
+
 npm run build
 
 $PagesDir = Join-Path $Root "_pages"
