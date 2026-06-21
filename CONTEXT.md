@@ -64,7 +64,8 @@ MindStorm/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── DEVELOPMENT.md
-│   └── FILE_FORMAT.md
+│   ├── FILE_FORMAT.md
+│   └── GROUPING.md         ← план: Группировать / Разгруппировать
 ├── canvases/
 │   └── README.md           ← референсные .canvas (опционально)
 ├── public/                 ← PWA, иконки, manifest
@@ -95,7 +96,8 @@ MindStorm/
 │   │   └── useDebouncedPersist.ts
 │   ├── lib/
 │   │   ├── jsonCanvas.ts
-│   │   ├── demoCanvas.ts   ← getDemoCanvas('ru' | 'en')
+│   │   ├── demoCanvas.ts   ← двуязычная демо-схема (i18n)
+│   │   ├── nodeLocale.ts   ← i18n содержимого карточек/групп/рёбер
 │   │   ├── flowEdges.ts
 │   │   ├── localBoardFile.ts
 │   │   ├── boardStorage.ts
@@ -145,8 +147,13 @@ MindStorm/
 
 ### `demoCanvas.ts`
 
-- `getDemoCanvas('ru' | 'en')` — две полные демо-схемы.
-- `getDemoBoardName(locale)`, `demoFlowPresentation(locale)`, `demoStats(locale)`.
+- `DEMO_CANVAS_I18N` — одна схема с переводами RU/EN в поле `i18n`.
+- `getDemoCanvas(locale)`, `getDemoBoardName(locale)`, `demoFlowPresentation(locale)`, `demoStats(locale)`.
+
+### `nodeLocale.ts`
+
+- `materializeNodeLocale` / `materializeEdgeLocale` — подстановка текста при смене языка.
+- `syncNodeI18nOnEdit` / `syncEdgeI18nOnEdit` — правки пишутся в `i18n[locale]`.
 
 ### `localBoardFile.ts` / `boardStorage.ts`
 
@@ -199,7 +206,7 @@ Legacy (миграция при чтении): `mindshtorm.canvas.v1`, `mindshto
 | **Загрузить** | Выбор файла. Toast «Открыто: …» / «Opened: …». |
 | **Сначала** (акцент) | Подтверждение → пустая доска; **Undo** вернёт прежнее. |
 | **↺ Демо** | Демо-схема на текущем языке + splash. |
-| **RU / EN** | Мгновенная смена языка UI; содержимое доски не меняется. |
+| **RU / EN** | Смена языка UI **и** содержимого доски (карточки, группы, подписи связей), если есть `i18n`. |
 | **Клик по узлу** | Панель: название + цвет. |
 | **Клик по связи** | Панель: подпись, удаление. |
 
@@ -251,6 +258,8 @@ CI: `.github/workflows/deploy.yml` — build + GitHub Pages при push в `main
 | 2026-06 | Переименование MindShtorm → **MindStorm**, `.mindstorm` |
 | 2026-06 | 12 цветов, 8 handles, панель выделения, Undo/Redo, «Сначала» + confirm |
 | 2026-06 | Локализация **RU/EN**, две демо-схемы; «Сначала» — accent-кнопка |
+| 2026-06 | i18n **содержимого доски** (`nodeLocale.ts`, `i18n` в JSON); разведение параллельных связей |
+| 2026-06 | **План:** кнопки «Группировать» / «Разгруппировать» для содержимого группы → [docs/GROUPING.md](./docs/GROUPING.md) |
 
 ---
 

@@ -40,6 +40,17 @@
 
 ---
 
+## Поделиться и установить
+
+**Ссылка для всех:** https://m11nic89co.github.io/mindstorm/
+
+- **Windows / Android:** Chrome или Edge → меню → «Установить MindStorm» (PWA, бесплатно).
+- **Донат автору:** кнопка **☕ Донат** внизу экрана (настраивается в `src/config/donate.ts`).
+
+Подробнее: [docs/PUBLISHING.md](./docs/PUBLISHING.md)
+
+---
+
 ## Локальная разработка
 
 ```bash
@@ -70,6 +81,8 @@ Push в `main` → GitHub Actions → https://m11nic89co.github.io/mindstorm/
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Архитектура и слои UI |
 | [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) | Сборка, деплой, Windows |
 | [docs/FILE_FORMAT.md](./docs/FILE_FORMAT.md) | Формат `.mindstorm` |
+| [docs/PUBLISHING.md](./docs/PUBLISHING.md) | Бесплатная публикация, PWA, донат |
+| [docs/GROUPING.md](./docs/GROUPING.md) | План: Группировать / Разгруппировать (отложено) |
 | [canvases/README.md](./canvases/README.md) | Референсные `.canvas` |
 
 ---
@@ -98,4 +111,4 @@ Vite · React 19 · TypeScript · Tailwind CSS v4 · @xyflow/react
 
 ## Лицензия
 
-MIT
+MIT © [m11nic89co](https://github.com/m11nic89co)

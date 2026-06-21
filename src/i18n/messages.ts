@@ -30,6 +30,14 @@ export type Messages = {
     desktop: string;
     mobile: string;
   };
+  footer: {
+    donate: string;
+    donateTitle: string;
+    donateHint: string;
+    donateCopy: string;
+    donateCopied: string;
+    donateLink: string;
+  };
   edgePanel: {
     title: string;
     placeholder: string;
@@ -156,6 +164,14 @@ export const messagesRu: Messages = {
       'Двойной клик — карточка · Клик по узлу — цвет и название · Линия — подпись · Delete',
     mobile: 'Тап×2 — карточка · Узел — цвет · Линия — подпись',
   },
+  footer: {
+    donate: '☕ Донат',
+    donateTitle: 'Поддержать автора',
+    donateHint: 'Скопируйте адрес и отправьте любую сумму — приложение бесплатное и останется таким.',
+    donateCopy: 'Скопировать адрес',
+    donateCopied: 'Скопировано ✓',
+    donateLink: 'GitHub — звезда проекту ★',
+  },
   edgePanel: {
     title: 'Связь',
     placeholder: 'Подпись...',
@@ -277,6 +293,14 @@ export const messagesEn: Messages = {
     desktop:
       'Double-click — new card · Click a node — name & color · Click a line — label · Delete',
     mobile: 'Double-tap — card · Node — color · Line — label',
+  },
+  footer: {
+    donate: '☕ Donate',
+    donateTitle: 'Support the author',
+    donateHint: 'Copy the address and send any amount — the app is free and stays free.',
+    donateCopy: 'Copy address',
+    donateCopied: 'Copied ✓',
+    donateLink: 'GitHub — star the repo ★',
   },
   edgePanel: {
     title: 'Connection',

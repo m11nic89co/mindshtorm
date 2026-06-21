@@ -81,8 +81,9 @@ npm.cmd run build
 
 1. Строки UI — в `src/i18n/messages.ts` (`messagesRu` и `messagesEn`).
 2. В компонентах: `const { m } = useLocale()` → `m.toolbar.save` и т.д.
-3. Демо-схема на доске — `src/lib/demoCanvas.ts` (`DEMO_CANVAS_RU` / `DEMO_CANVAS_EN`).
+3. Демо-схема — `src/lib/demoCanvas.ts` (`DEMO_CANVAS_I18N`, i18n RU/EN).
 4. Ключ localStorage: `mindstorm.locale.v1`.
+5. План группировки содержимого группы — [GROUPING.md](./GROUPING.md).
 
 ## Git
 

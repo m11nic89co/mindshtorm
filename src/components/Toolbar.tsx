@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { useLocale } from '../i18n/LocaleProvider';
 import type { Locale } from '../i18n/messages';
 import { LogoMark, BoardStatsText } from './LogoMark';
-import { AUTHOR_NAME, REPO_URL } from '../lib/siteMeta';
+import { DonateChip } from './DonateChip';
+import { AUTHOR_NAME, LIVE_URL, REPO_URL } from '../lib/siteMeta';
 import { COLOR_IDS, swatchFill, swatchTitle } from '../lib/colors';
 
 type ToolbarProps = {
@@ -254,7 +255,7 @@ export function HintBar() {
         <span className="hidden sm:inline">{m.hints.desktop}</span>
         <span className="sm:hidden">{m.hints.mobile}</span>
       </div>
-      <div className="pointer-events-auto rounded-full border border-white/6 bg-white/[0.02] px-2 py-0.5 text-[8px] text-white/25 backdrop-blur-md sm:text-[9px]">
+      <div className="pointer-events-auto relative rounded-full border border-white/6 bg-white/[0.02] px-2 py-0.5 text-[8px] text-white/25 backdrop-blur-md sm:text-[9px]">
         <span className="text-white/20">by </span>
         <a
           href={REPO_URL}
@@ -265,13 +266,16 @@ export function HintBar() {
           {AUTHOR_NAME}
         </a>
         <span className="mx-1 text-white/10">·</span>
+        <DonateChip />
+        <span className="mx-1 text-white/10">·</span>
         <a
-          href={REPO_URL}
+          href={LIVE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-white/30 transition hover:text-white/50"
+          title={LIVE_URL}
         >
-          github.com/{AUTHOR_NAME}/mindstorm
+          mindstorm
         </a>
       </div>
     </footer>

@@ -42,6 +42,14 @@
 
 Общие поля: `id`, `x`, `y`, `width`, `height`, `color` (`"1"`…`"12"`).
 
+### Расширения MindStorm (не Obsidian)
+
+| Поле | Где | Описание |
+|------|-----|----------|
+| `label` | `text` | Badge над карточкой |
+| `i18n` | `text`, `group`, `edges` | Переводы RU/EN (`ru.text`, `en.text`, `ru.label`, …) |
+| `parentGroupId` | любой узел *(план)* | ID группы, к которой «прикреплён» узел после **Группировать**. Координаты `x`/`y` в файле остаются **абсолютными** для совместимости с `.canvas`. См. [GROUPING.md](./GROUPING.md). |
+
 Пример text-узла с названием:
 
 ```json
@@ -91,4 +99,8 @@
 
 ## Демо в коде
 
-`src/lib/demoCanvas.ts` — `getDemoCanvas('ru' | 'en')`, две встроенные схемы.
+`src/lib/demoCanvas.ts` — `DEMO_CANVAS_I18N` (одна схема, переводы в `i18n`), `getDemoCanvas(locale)`.
+
+## Группировка (в разработке)
+
+Спецификация и риски: [GROUPING.md](./GROUPING.md).
