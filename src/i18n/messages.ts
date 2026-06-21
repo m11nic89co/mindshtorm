@@ -34,6 +34,7 @@ export type Messages = {
     donate: string;
     donateTitle: string;
     donateHint: string;
+    donateMin: string;
     donateCopy: string;
     donateCopied: string;
     donateLink: string;
@@ -167,8 +168,8 @@ export const messagesRu: Messages = {
   footer: {
     donate: '☕ Донат',
     donateTitle: 'Поддержать автора',
-    donateHint:
-      'Скопируйте адрес и отправьте USDT (Tron TRC20), мин. 0,01 USDT. Приложение бесплатное.',
+    donateHint: 'Выберите сеть, скопируйте адрес и отправьте USDT. Приложение бесплатное.',
+    donateMin: 'Мин. ввод',
     donateCopy: 'Скопировать адрес',
     donateCopied: 'Скопировано ✓',
     donateLink: 'Открыть страницу доната',
@@ -298,10 +299,11 @@ export const messagesEn: Messages = {
   footer: {
     donate: '☕ Donate',
     donateTitle: 'Support the author',
-    donateHint: 'Copy the address and send any amount — the app is free and stays free.',
+    donateHint:
+      'Copy the address and send USDT (Tron TRC20), min. 0.01 USDT. The app is free.',
     donateCopy: 'Copy address',
     donateCopied: 'Copied ✓',
-    donateLink: 'GitHub — star the repo ★',
+    donateLink: 'Open donation page',
   },
   edgePanel: {
     title: 'Connection',

@@ -79,6 +79,11 @@ export function DonateChip() {
                   <div className="mb-1 text-[9px] font-medium uppercase tracking-wide text-white/35">
                     {item.label}
                   </div>
+                  {item.min ? (
+                    <div className="mb-1.5 text-[9px] text-white/30">
+                      {m.footer.donateMin}: {item.min}
+                    </div>
+                  ) : null}
                   <div className="mb-2 break-all font-mono text-[10px] leading-snug text-cyan-100/90">
                     {item.wallet}
                   </div>

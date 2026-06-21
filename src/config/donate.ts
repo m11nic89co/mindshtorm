@@ -13,6 +13,8 @@
 export type DonateWallet = {
   label: string;
   wallet: string;
+  /** Минимальная сумма, например «0,01 USDT» */
+  min?: string;
 };
 
 const envWallet = import.meta.env.VITE_DONATE_WALLET?.trim() ?? '';
@@ -23,7 +25,18 @@ const envLink = import.meta.env.VITE_DONATE_LINK?.trim() ?? '';
 export const DONATE_WALLETS: DonateWallet[] = [
   ...(envWallet
     ? [{ label: envLabel, wallet: envWallet }]
-    : [{ label: 'USDT · Tron (TRC20)', wallet: 'TJDeM6zHao6jKUVhf2fLcACL3DmwqwP8aX' }]),
+    : [
+        {
+          label: 'USDT · Tron (TRC20)',
+          wallet: 'TJDeM6zHao6jKUVhf2fLcACL3DmwqwP8aX',
+          min: '0,01 USDT',
+        },
+        {
+          label: 'USDT · TON',
+          wallet: 'UQA1Xz5oPR3BhldHDfgxRQ8GIf3fDjYk-M4iidzdDaOd6Ylj',
+          min: '0,001 USDT',
+        },
+      ]),
 ];
 
 /** Опциональная ссылка (Boosty, Ko-fi, DonationAlerts) — откроется в новой вкладке. */
