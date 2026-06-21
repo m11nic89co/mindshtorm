@@ -3,10 +3,10 @@ import { useLocale } from '../i18n/LocaleProvider';
 import type { DonateMethod, DonatePlatform } from '../config/donate';
 import { DONATE_METHODS, hasDonateOptions } from '../config/donate';
 
-const PLATFORM_STYLES: Record<
-  DonatePlatform,
-  { button: string; badge: string }
-> = {
+const COPY_FLASH_MS = 700;
+const COPY_LABEL_MS = 2600;
+
+const PLATFORM_STYLES: Record<DonatePlatform, { button: string; badge: string }> = {
   paypal: {
     button:
       'border-blue-400/35 bg-[#0070ba]/18 text-blue-50 hover:border-blue-300/50 hover:bg-[#0070ba]/28',
@@ -38,36 +38,71 @@ function methodHint(method: DonateMethod, locale: 'ru' | 'en'): string {
   return locale === 'ru' ? method.hintRu : method.hintEn;
 }
 
+function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 12l5 5L20 7"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function DonateChip() {
   const { locale, m } = useLocale();
   const [open, setOpen] = useState(false);
-  const [cryptoOpen, setCryptoOpen] = useState(false);
+  const [cryptoOpen, setCryptoOpen] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [flashId, setFlashId] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const copyTimersRef = useRef<{ label?: number; flash?: number }>({});
+
+  const closePanel = useCallback(() => setOpen(false), []);
 
   const copyWallet = useCallback(async (id: string, wallet: string) => {
     try {
       await navigator.clipboard.writeText(wallet);
+      window.clearTimeout(copyTimersRef.current.label);
+      window.clearTimeout(copyTimersRef.current.flash);
+
       setCopiedId(id);
-      window.setTimeout(() => setCopiedId(null), 2000);
+      setFlashId(id);
+
+      copyTimersRef.current.flash = window.setTimeout(() => setFlashId(null), COPY_FLASH_MS);
+      copyTimersRef.current.label = window.setTimeout(() => setCopiedId(null), COPY_LABEL_MS);
     } catch {
       /* ignore */
     }
   }, []);
 
   useEffect(() => {
-    if (!open) {
-      setCryptoOpen(false);
-      return;
-    }
+    if (!open) return;
+    setCryptoOpen(true);
 
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') closePanel();
     };
 
     const onPointer = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        setOpen(false);
+        closePanel();
       }
     };
 
@@ -77,7 +112,14 @@ export function DonateChip() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('mousedown', onPointer);
     };
-  }, [open]);
+  }, [open, closePanel]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(copyTimersRef.current.label);
+      window.clearTimeout(copyTimersRef.current.flash);
+    };
+  }, []);
 
   if (!hasDonateOptions()) return null;
 
@@ -99,9 +141,22 @@ export function DonateChip() {
           className="pointer-events-auto absolute bottom-full left-1/2 z-30 mb-2 max-h-[min(75vh,26rem)] w-[min(calc(100vw-1.5rem),21rem)] -translate-x-1/2 overflow-y-auto rounded-2xl border border-white/10 bg-[#12182a]/97 p-3 shadow-2xl backdrop-blur-xl"
           role="dialog"
           aria-label={m.footer.donateTitle}
+          aria-modal="true"
         >
-          <p className="mb-1 text-[11px] font-semibold text-white/92">{m.footer.donateTitle}</p>
-          <p className="mb-2.5 text-[9px] leading-relaxed text-white/42">{m.footer.donateHint}</p>
+          <div className="mb-2.5 flex items-start justify-between gap-2">
+            <div className="min-w-0 pr-1">
+              <p className="text-[11px] font-semibold text-white/92">{m.footer.donateTitle}</p>
+              <p className="mt-0.5 text-[9px] leading-relaxed text-white/42">{m.footer.donateHint}</p>
+            </div>
+            <button
+              type="button"
+              onClick={closePanel}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/45 transition hover:border-white/20 hover:bg-white/10 hover:text-white/80"
+              aria-label={m.footer.donateClose}
+            >
+              <CloseIcon />
+            </button>
+          </div>
 
           <div className="flex flex-col gap-1.5">
             {DONATE_METHODS.map((method) => {
@@ -155,10 +210,15 @@ export function DonateChip() {
                     <div className="flex flex-col gap-1.5 pl-1">
                       {method.wallets.map((item) => {
                         const id = `${item.label}-${item.wallet.slice(0, 8)}`;
+                        const isCopied = copiedId === id;
+                        const isFlashing = flashId === id;
+
                         return (
                           <div
                             key={id}
-                            className="rounded-xl border border-white/8 bg-black/30 p-2.5"
+                            className={`rounded-xl border bg-black/30 p-2.5 transition-colors ${
+                              isFlashing ? 'donate-wallet-flash border-emerald-400/55' : 'border-white/8'
+                            } ${isCopied ? 'border-emerald-400/35' : ''}`}
                           >
                             <div className="mb-1 text-[9px] font-medium text-white/40">
                               USDT · {item.label}
@@ -168,16 +228,36 @@ export function DonateChip() {
                                 {m.footer.donateMin}: {item.min}
                               </div>
                             ) : null}
-                            <div className="mb-2 break-all font-mono text-[10px] leading-snug text-cyan-100/90">
+                            <div
+                              className={`mb-2 break-all font-mono text-[10px] leading-snug transition-colors ${
+                                isCopied ? 'text-emerald-200' : 'text-cyan-100/90'
+                              }`}
+                            >
                               {item.wallet}
                             </div>
                             <button
                               type="button"
                               onClick={() => void copyWallet(id, item.wallet)}
-                              className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[10px] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                              className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition ${
+                                isCopied
+                                  ? 'donate-copy-pulse border-emerald-400/45 bg-emerald-500/25 text-emerald-100'
+                                  : 'border-white/10 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white'
+                              }`}
                             >
-                              {copiedId === id ? m.footer.donateCopied : m.footer.donateCopy}
+                              {isCopied ? (
+                                <>
+                                  <CheckIcon />
+                                  {m.footer.donateCopied}
+                                </>
+                              ) : (
+                                m.footer.donateCopy
+                              )}
                             </button>
+                            {isCopied ? (
+                              <p className="mt-1.5 text-center text-[9px] font-medium text-emerald-300/85">
+                                {m.footer.donateCopiedHint}
+                              </p>
+                            ) : null}
                           </div>
                         );
                       })}

@@ -40,6 +40,8 @@ export type Messages = {
     donateCryptoShow: string;
     donateCryptoHide: string;
     donateMin: string;
+    donateClose: string;
+    donateCopiedHint: string;
     donateCopy: string;
     donateCopied: string;
   };
@@ -172,15 +174,17 @@ export const messagesRu: Messages = {
   footer: {
     donate: '☕ Донат',
     donateTitle: 'Поддержать MindStorm',
-    donateHint: '5 способов — выберите один, оплата на защищённой странице платформы.',
+    donateHint: 'PayPal или USDT — выберите способ.',
     donateSectionCard: 'Картой и PayPal',
     donateSectionCrypto: 'Криптовалюта USDT',
     donateOpen: 'Оплатить →',
     donateCryptoShow: 'Сети →',
     donateCryptoHide: 'Свернуть',
     donateMin: 'Мин. ввод',
+    donateClose: 'Закрыть',
     donateCopy: 'Скопировать адрес',
     donateCopied: 'Скопировано ✓',
+    donateCopiedHint: 'Адрес в буфере — вставьте в кошелёк',
   },
   edgePanel: {
     title: 'Связь',
@@ -307,15 +311,17 @@ export const messagesEn: Messages = {
   footer: {
     donate: '☕ Donate',
     donateTitle: 'Support MindStorm',
-    donateHint: '5 options — pick one; checkout on the platform’s secure page.',
+    donateHint: 'PayPal or USDT — pick your method.',
     donateSectionCard: 'Card & PayPal',
     donateSectionCrypto: 'USDT crypto',
     donateOpen: 'Pay →',
     donateCryptoShow: 'Networks →',
     donateCryptoHide: 'Collapse',
     donateMin: 'Min. deposit',
+    donateClose: 'Close',
     donateCopy: 'Copy address',
     donateCopied: 'Copied ✓',
+    donateCopiedHint: 'Address in clipboard — paste in your wallet',
   },
   edgePanel: {
     title: 'Connection',

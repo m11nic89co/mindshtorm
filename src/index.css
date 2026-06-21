@@ -222,3 +222,38 @@ body {
     top: calc(env(safe-area-inset-top, 0px) + 10.25rem);
   }
 }
+
+@keyframes donate-wallet-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  45% {
+    box-shadow: 0 0 22px 2px rgba(52, 211, 153, 0.42);
+    border-color: rgba(52, 211, 153, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+    border-color: rgba(52, 211, 153, 0.35);
+  }
+}
+
+@keyframes donate-copy-pulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.donate-wallet-flash {
+  animation: donate-wallet-flash 0.65s ease-out;
+}
+
+.donate-copy-pulse {
+  animation: donate-copy-pulse 0.45s ease-out;
+}

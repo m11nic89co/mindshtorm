@@ -1,11 +1,8 @@
 /**
- * Пять способов доната MindStorm (2026).
+ * Способы доната MindStorm.
  *
- * Порядок — по скорости checkout и мировому охвату:
- * PayPal → Ko-fi → Buy Me a Coffee → Boosty → USDT.
- *
- * PayPal: замените ник в URL, если paypal.me другой (Profile → PayPal.Me).
- * Остальное — зарегистрируйте страницу с тем же ником или обновите url.
+ * Активны сейчас: PayPal + USDT.
+ * Ko-fi, Buy Me a Coffee, Boosty — в PLANNED_METHODS (добавить в DONATE_METHODS позже).
  */
 
 export type DonateWallet = {
@@ -63,25 +60,41 @@ const USDT_WALLETS: DonateWallet[] = [
   },
 ];
 
-/** Ровно 5 способов — одна панель, один клик до оплаты (кроме выбора сети USDT). */
-export const DONATE_METHODS: DonateMethod[] = [
+/** Сейчас в UI — только готовые способы. */
+const ACTIVE_METHODS: DonateMethod[] = [
   {
     id: 'paypal',
     kind: 'link',
     platform: 'paypal',
     label: 'PayPal',
     url: envPaypal || `https://paypal.me/${HANDLE}`,
-    hintRu: 'PayPal, карта — без регистрации у получателя',
-    hintEn: 'PayPal balance or card — 1–2 taps',
+    hintRu: 'PayPal или карта — 1–2 клика',
+    hintEn: 'PayPal or card — 1–2 taps',
   },
+  {
+    id: 'usdt',
+    kind: 'crypto',
+    platform: 'crypto',
+    label: 'USDT',
+    hintRu: 'Tron (TRC20) или TON — скопировать адрес',
+    hintEn: 'Tron (TRC20) or TON — copy address',
+    wallets: USDT_WALLETS,
+  },
+];
+
+/**
+ * Отложено — раскомментировать и добавить в ACTIVE_METHODS после регистрации.
+ * См. docs/DONATE_SETUP.md
+ */
+export const PLANNED_METHODS: DonateLinkMethod[] = [
   {
     id: 'kofi',
     kind: 'link',
     platform: 'kofi',
     label: 'Ko-fi',
     url: envKofi || `https://ko-fi.com/${HANDLE}`,
-    hintRu: 'Карта, PayPal, Apple Pay — 0% комиссии платформы',
-    hintEn: 'Card, PayPal, Apple Pay — 0% platform fee',
+    hintRu: 'Карта, PayPal, Apple Pay',
+    hintEn: 'Card, PayPal, Apple Pay',
   },
   {
     id: 'buymeacoffee',
@@ -89,8 +102,8 @@ export const DONATE_METHODS: DonateMethod[] = [
     platform: 'buymeacoffee',
     label: 'Buy Me a Coffee',
     url: envBmc || `https://buymeacoffee.com/${HANDLE}`,
-    hintRu: 'Карта, Apple/Google Pay — привычный «кофе»-донат',
-    hintEn: 'Card, Apple/Google Pay — familiar tip flow',
+    hintRu: 'Карта, Apple/Google Pay',
+    hintEn: 'Card, Apple/Google Pay',
   },
   {
     id: 'boosty',
@@ -99,18 +112,11 @@ export const DONATE_METHODS: DonateMethod[] = [
     label: 'Boosty',
     url: envBoosty || `https://boosty.to/${HANDLE}/donate`,
     hintRu: 'Россия и СНГ: карта, СБП',
-    hintEn: 'Russia & CIS: card, local bank apps',
+    hintEn: 'Russia & CIS: card, SBP',
   },
-  {
-    id: 'usdt',
-    kind: 'crypto',
-    platform: 'crypto',
-    label: 'USDT',
-    hintRu: 'Криптовалюта — Tron или TON, скопировать адрес',
-    hintEn: 'Crypto — Tron or TON, copy address',
-    wallets: USDT_WALLETS,
-  },
-].filter((method) => {
+];
+
+export const DONATE_METHODS: DonateMethod[] = ACTIVE_METHODS.filter((method) => {
   if (method.kind === 'link') return method.url.trim().length > 0;
   return method.wallets.some((w) => w.wallet.trim().length > 0);
 });
