@@ -37,6 +37,8 @@ export type Messages = {
     donateSectionCard: string;
     donateSectionCrypto: string;
     donateOpen: string;
+    donateCryptoShow: string;
+    donateCryptoHide: string;
     donateMin: string;
     donateCopy: string;
     donateCopied: string;
@@ -170,10 +172,12 @@ export const messagesRu: Messages = {
   footer: {
     donate: '☕ Донат',
     donateTitle: 'Поддержать MindStorm',
-    donateHint: 'Приложение бесплатное. Выберите удобный способ — карта или криптовалюта.',
+    donateHint: '5 способов — выберите один, оплата на защищённой странице платформы.',
     donateSectionCard: 'Картой и PayPal',
     donateSectionCrypto: 'Криптовалюта USDT',
-    donateOpen: 'Открыть →',
+    donateOpen: 'Оплатить →',
+    donateCryptoShow: 'Сети →',
+    donateCryptoHide: 'Свернуть',
     donateMin: 'Мин. ввод',
     donateCopy: 'Скопировать адрес',
     donateCopied: 'Скопировано ✓',
@@ -303,10 +307,12 @@ export const messagesEn: Messages = {
   footer: {
     donate: '☕ Donate',
     donateTitle: 'Support MindStorm',
-    donateHint: 'The app is free. Pick what works for you — card or crypto.',
+    donateHint: '5 options — pick one; checkout on the platform’s secure page.',
     donateSectionCard: 'Card & PayPal',
     donateSectionCrypto: 'USDT crypto',
-    donateOpen: 'Open →',
+    donateOpen: 'Pay →',
+    donateCryptoShow: 'Networks →',
+    donateCryptoHide: 'Collapse',
     donateMin: 'Min. deposit',
     donateCopy: 'Copy address',
     donateCopied: 'Copied ✓',
