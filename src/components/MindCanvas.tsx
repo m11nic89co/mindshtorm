@@ -237,7 +237,9 @@ function MindCanvasInner() {
           fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15}
           maxZoom={2}
-          panOnScroll
+          panOnScroll={false}
+          zoomOnScroll
+          zoomActivationKeyCode={null}
           zoomOnPinch
           zoomOnDoubleClick={false}
           selectionOnDrag={false}
