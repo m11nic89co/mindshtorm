@@ -322,12 +322,13 @@ function MindCanvasInner() {
         id: createId('text'),
         type: 'textCard',
         position: position ?? { x: center.x - 130, y: center.y - 60 },
-        style: { width: 260, height: 120 },
+        style: { width: 260, height: 140 },
         data: {
           canvasType: 'text',
           text: m.card.defaultText,
+          label: '',
           i18n: Object.fromEntries(
-            LOCALES.map((loc) => [loc, { text: messagesFor(loc).card.defaultText }]),
+            LOCALES.map((loc) => [loc, { text: messagesFor(loc).card.defaultText, label: '' }]),
           ) as NodeI18n,
           color: '5',
         },

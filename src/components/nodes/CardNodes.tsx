@@ -17,8 +17,11 @@ const resizerHandles =
 
 const resizerLines = '!border-indigo-400/45';
 
+const cardTitleTypography =
+  'w-full truncate text-[15px] font-semibold leading-snug tracking-tight text-white/95';
+
 const cardBodyTypography =
-  'min-h-[3rem] w-full text-sm leading-relaxed text-white/90 whitespace-pre-wrap';
+  'min-h-[2.5rem] w-full flex-1 text-sm leading-relaxed text-white/88 whitespace-pre-wrap';
 
 function CardBodyText({ text, placeholder }: { text: string; placeholder: string }) {
   if (!text) {
@@ -30,55 +33,95 @@ function CardBodyText({ text, placeholder }: { text: string; placeholder: string
 export function TextCardNode({ id, data, selected }: TextCardProps) {
   const { updateNode } = useCanvasActions();
   const { m } = useLocale();
-  const [editing, setEditing] = useState(false);
-  const [editSession, setEditSession] = useState(0);
-  const [optimisticText, setOptimisticText] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleEditSession, setTitleEditSession] = useState(0);
+  const [optimisticTitle, setOptimisticTitle] = useState<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const [editingBody, setEditingBody] = useState(false);
+  const [bodyEditSession, setBodyEditSession] = useState(0);
+  const [optimisticBody, setOptimisticBody] = useState<string | null>(null);
+  const bodyTextareaRef = useRef<HTMLTextAreaElement>(null);
   const palette = resolveColor(data.color);
 
-  const storedText = data.text ?? '';
-  const visibleText = optimisticText ?? storedText;
+  const storedTitle = data.label ?? '';
+  const storedBody = data.text ?? '';
+  const visibleTitle = optimisticTitle ?? storedTitle;
+  const visibleBody = optimisticBody ?? storedBody;
 
   useEffect(() => {
-    if (optimisticText !== null && storedText === optimisticText) {
-      setOptimisticText(null);
+    if (optimisticTitle !== null && storedTitle === optimisticTitle) {
+      setOptimisticTitle(null);
     }
-  }, [storedText, optimisticText]);
+  }, [storedTitle, optimisticTitle]);
 
-  const beginEditing = () => {
-    setEditSession((session) => session + 1);
-    setEditing(true);
+  useEffect(() => {
+    if (optimisticBody !== null && storedBody === optimisticBody) {
+      setOptimisticBody(null);
+    }
+  }, [storedBody, optimisticBody]);
+
+  const beginTitleEdit = () => {
+    setTitleEditSession((session) => session + 1);
+    setEditingTitle(true);
   };
 
-  const commitEditing = () => {
-    const next = textareaRef.current?.value ?? '';
-    setEditing(false);
-    if (next !== storedText) {
-      setOptimisticText(next);
+  const commitTitleEdit = () => {
+    const next = titleInputRef.current?.value ?? '';
+    setEditingTitle(false);
+    if (next !== storedTitle) {
+      setOptimisticTitle(next);
+      updateNode(id, { label: next });
+    }
+  };
+
+  const cancelTitleEdit = () => {
+    setEditingTitle(false);
+    setOptimisticTitle(null);
+  };
+
+  const beginBodyEdit = () => {
+    setBodyEditSession((session) => session + 1);
+    setEditingBody(true);
+  };
+
+  const commitBodyEdit = () => {
+    const next = bodyTextareaRef.current?.value ?? '';
+    setEditingBody(false);
+    if (next !== storedBody) {
+      setOptimisticBody(next);
       updateNode(id, { text: next });
     }
   };
 
-  const cancelEditing = () => {
-    setEditing(false);
-    setOptimisticText(null);
+  const cancelBodyEdit = () => {
+    setEditingBody(false);
+    setOptimisticBody(null);
   };
 
   useEffect(() => {
-    if (!editing) return;
-    const el = textareaRef.current;
+    if (!editingTitle) return;
+    const el = titleInputRef.current;
     if (!el) return;
     el.focus();
     const end = el.value.length;
     el.setSelectionRange(end, end);
-  }, [editing, editSession]);
+  }, [editingTitle, titleEditSession]);
+
+  useEffect(() => {
+    if (!editingBody) return;
+    const el = bodyTextareaRef.current;
+    if (!el) return;
+    el.focus();
+    const end = el.value.length;
+    el.setSelectionRange(end, end);
+  }, [editingBody, bodyEditSession]);
 
   return (
     <>
       <NodeResizer
         isVisible={selected}
         minWidth={160}
-        minHeight={72}
+        minHeight={100}
         maxWidth={900}
         maxHeight={800}
         color="#818cf8"
@@ -94,46 +137,87 @@ export function TextCardNode({ id, data, selected }: TextCardProps) {
           borderColor: palette.border,
           boxShadow: selected ? undefined : `0 8px 32px -12px ${palette.glow}`,
         }}
-        onDoubleClick={(e) => {
-          e.stopPropagation();
-          beginEditing();
-        }}
       >
         <EdgeHandles />
 
-        {data.label?.trim() ? (
+        <div className="flex h-full min-h-0 flex-col">
           <div
-            style={{ background: palette.border }}
-            className="pointer-events-none absolute -top-3 left-4 z-[1] max-w-[calc(100%-2rem)] truncate rounded-full px-3 py-0.5 text-xs font-medium text-white/90"
+            className="nodrag nopan shrink-0 border-b px-4 pb-2.5 pt-3"
+            style={{ borderColor: `${palette.border}` }}
           >
-            {data.label}
+            {editingTitle ? (
+              <input
+                key={titleEditSession}
+                ref={titleInputRef}
+                defaultValue={storedTitle}
+                onBlur={commitTitleEdit}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    titleInputRef.current?.blur();
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    if (titleInputRef.current) titleInputRef.current.value = storedTitle;
+                    cancelTitleEdit();
+                  }
+                }}
+                className={`${cardTitleTypography} nodrag nopan rounded-md bg-transparent outline-none ring-2 ring-indigo-400/35 placeholder:text-white/35`}
+                placeholder={m.card.titlePlaceholder}
+                spellCheck
+              />
+            ) : (
+              <div
+                className={`${cardTitleTypography} nodrag nopan min-h-[1.35rem] cursor-text`}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  beginTitleEdit();
+                }}
+                title={m.card.titleEditHint}
+              >
+                {visibleTitle ? (
+                  visibleTitle
+                ) : (
+                  <span className="font-medium text-white/35">{m.card.titlePlaceholder}</span>
+                )}
+              </div>
+            )}
           </div>
-        ) : null}
 
-        <div className={`nodrag nopan flex h-full flex-col overflow-auto p-4 ${data.label?.trim() ? 'pt-5' : ''}`}>
-          {editing ? (
-            <textarea
-              key={editSession}
-              ref={textareaRef}
-              defaultValue={storedText}
-              onBlur={commitEditing}
-              onMouseDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  if (textareaRef.current) textareaRef.current.value = storedText;
-                  cancelEditing();
-                }
-              }}
-              className={`${cardBodyTypography} nodrag nopan h-full resize-none bg-transparent outline-none placeholder:text-white/35`}
-              placeholder={m.card.placeholder}
-              spellCheck
-            />
-          ) : (
-            <CardBodyText text={visibleText} placeholder={m.card.placeholder} />
-          )}
+          <div
+            className="nodrag nopan flex min-h-0 flex-1 flex-col overflow-auto px-4 py-3"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              beginBodyEdit();
+            }}
+          >
+            {editingBody ? (
+              <textarea
+                key={bodyEditSession}
+                ref={bodyTextareaRef}
+                defaultValue={storedBody}
+                onBlur={commitBodyEdit}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    if (bodyTextareaRef.current) bodyTextareaRef.current.value = storedBody;
+                    cancelBodyEdit();
+                  }
+                }}
+                className={`${cardBodyTypography} nodrag nopan h-full resize-none bg-transparent outline-none placeholder:text-white/35`}
+                placeholder={m.card.placeholder}
+                spellCheck
+              />
+            ) : (
+              <CardBodyText text={visibleBody} placeholder={m.card.placeholder} />
+            )}
+          </div>
         </div>
       </div>
     </>

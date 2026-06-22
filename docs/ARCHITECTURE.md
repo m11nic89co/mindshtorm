@@ -75,6 +75,7 @@ onResizeEnd   → commitNow + persistCanvas
 ## React Flow
 
 - Узлы: `textCard`, `groupCard`.
+- **Text-карточка:** `data.label` — заголовок (верх), `data.text` — тело (низ); в `CardNodes.tsx` — отдельное редактирование по двойному клику.
 - Рёбра: `smoothstep`, `animated`, цвет от **source**, стрелка на **target**.
 - Handles: `EdgeHandles` — 8 точек (`source-{side}-{a|b}`), `ConnectionMode.Loose`.
 - `zIndexMode="manual"`, `elevateNodesOnSelect={false}`.
@@ -85,7 +86,7 @@ onResizeEnd   → commitNow + persistCanvas
 - `.react-flow__edges` → `z-index: 0`
 - Карточки → `z-index: 1+`
 
-Метки групп и badge карточек — внутри узла (`absolute`, `-top-3`).
+Метка группы — badge на верхней кромке (`absolute`, `-top-3`). Заголовок text-карточки — **внутри** узла, над разделителем.
 
 ## Панели выделения
 

@@ -86,6 +86,8 @@ export type Messages = {
     newIdea: string;
     placeholder: string;
     defaultText: string;
+    titlePlaceholder: string;
+    titleEditHint: string;
   };
   group: {
     defaultLabel: string;
@@ -187,7 +189,7 @@ export const messagesRu: Messages = {
     group: 'Группа',
     card: 'Карточка',
     groupNamePlaceholder: 'Название группы...',
-    cardNamePlaceholder: 'Название карточки...',
+    cardNamePlaceholder: 'Заголовок карточки...',
     color: 'Цвет',
   },
   saveModal: {
@@ -234,8 +236,10 @@ export const messagesRu: Messages = {
   colorsCustom: 'Свой цвет',
   card: {
     newIdea: 'Новая идея',
-    placeholder: 'Markdown-текст...',
-    defaultText: '## Новая идея\nОпишите мысль...',
+    placeholder: 'Текст карточки...',
+    defaultText: '',
+    titlePlaceholder: 'Заголовок',
+    titleEditHint: 'Двойной клик — редактировать заголовок',
   },
   group: {
     defaultLabel: 'Группа',
@@ -319,7 +323,7 @@ export const messagesEn: Messages = {
     group: 'Group',
     card: 'Card',
     groupNamePlaceholder: 'Group name...',
-    cardNamePlaceholder: 'Card name...',
+    cardNamePlaceholder: 'Card title...',
     color: 'Color',
   },
   saveModal: {
@@ -366,8 +370,10 @@ export const messagesEn: Messages = {
   colorsCustom: 'Custom color',
   card: {
     newIdea: 'New idea',
-    placeholder: 'Markdown text...',
-    defaultText: '## New idea\nDescribe your thought...',
+    placeholder: 'Card body text...',
+    defaultText: '',
+    titlePlaceholder: 'Title',
+    titleEditHint: 'Double-click to edit title',
   },
   group: {
     defaultLabel: 'Group',
@@ -451,7 +457,7 @@ export const messagesEs: Messages = {
     group: 'Grupo',
     card: 'Carta',
     groupNamePlaceholder: 'Nombre del grupo...',
-    cardNamePlaceholder: 'Nombre de la carta...',
+    cardNamePlaceholder: 'Título de la carta...',
     color: 'Color',
   },
   saveModal: {
@@ -498,8 +504,10 @@ export const messagesEs: Messages = {
   colorsCustom: 'Color personalizado',
   card: {
     newIdea: 'Nueva idea',
-    placeholder: 'Texto Markdown...',
-    defaultText: '## Nueva idea\nDescribe tu pensamiento...',
+    placeholder: 'Texto de la carta...',
+    defaultText: '',
+    titlePlaceholder: 'Título',
+    titleEditHint: 'Doble clic para editar el título',
   },
   group: {
     defaultLabel: 'Grupo',
@@ -582,7 +590,7 @@ export const messagesZh: Messages = {
     group: '分组',
     card: '卡片',
     groupNamePlaceholder: '分组名称...',
-    cardNamePlaceholder: '卡片名称...',
+    cardNamePlaceholder: '卡片标题...',
     color: '颜色',
   },
   saveModal: {
@@ -628,8 +636,10 @@ export const messagesZh: Messages = {
   colorsCustom: '自定义颜色',
   card: {
     newIdea: '新想法',
-    placeholder: 'Markdown 文本...',
-    defaultText: '## 新想法\n描述你的想法...',
+    placeholder: '卡片正文...',
+    defaultText: '',
+    titlePlaceholder: '标题',
+    titleEditHint: '双击编辑标题',
   },
   group: {
     defaultLabel: '分组',
