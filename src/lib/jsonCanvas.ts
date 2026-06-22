@@ -45,7 +45,10 @@ export function canvasToFlow(canvas: JsonCanvas): { nodes: Node<CardNodeData>[];
       if (node.textFontSize != null) data.textFontSize = node.textFontSize;
     }
     if (node.type === 'link') data.url = node.url;
-    if (node.type === 'group') data.label = node.label;
+    if (node.type === 'group') {
+      data.label = node.label;
+      if (node.labelFontSize != null) data.labelFontSize = node.labelFontSize;
+    }
     if (node.type === 'file') data.file = node.file;
     if (node.i18n) data.i18n = node.i18n;
 
@@ -102,6 +105,7 @@ function flowNodeToCanvas(node: Node<CardNodeData>): JsonCanvasNode {
       ...base,
       type: 'group',
       label: node.data.label ?? 'Группа',
+      ...(node.data.labelFontSize != null ? { labelFontSize: node.data.labelFontSize } : {}),
       i18n: node.data.i18n,
     };
   }

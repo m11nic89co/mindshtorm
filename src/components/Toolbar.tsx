@@ -12,6 +12,12 @@ import {
   MAX_CARD_FONT_SIZE,
   MIN_CARD_FONT_SIZE,
 } from '../lib/cardTypography';
+import {
+  clampGroupLabelFontSize,
+  DEFAULT_GROUP_LABEL_FONT_SIZE,
+  MAX_GROUP_LABEL_FONT_SIZE,
+  MIN_GROUP_LABEL_FONT_SIZE,
+} from '../lib/groupLabel';
 
 type ToolbarProps = {
   onAddText: () => void;
@@ -332,13 +338,16 @@ export function EdgeSelectionPanel({
   );
 }
 
-function CardFontSizeControl({
+function FontSizeControl({
   label,
   value,
   onChange,
   decreaseAria,
   increaseAria,
   unit,
+  min,
+  max,
+  clamp,
 }: {
   label: string;
   value: number;
@@ -346,8 +355,11 @@ function CardFontSizeControl({
   decreaseAria: string;
   increaseAria: string;
   unit: string;
+  min: number;
+  max: number;
+  clamp: (size: number) => number;
 }) {
-  const step = (delta: number) => onChange(clampCardFontSize(value + delta));
+  const step = (delta: number) => onChange(clamp(value + delta));
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -356,7 +368,7 @@ function CardFontSizeControl({
         <button
           type="button"
           onClick={() => step(-1)}
-          disabled={value <= MIN_CARD_FONT_SIZE}
+          disabled={value <= min}
           aria-label={decreaseAria}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/30 text-sm text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
         >
@@ -364,12 +376,12 @@ function CardFontSizeControl({
         </button>
         <input
           type="number"
-          min={MIN_CARD_FONT_SIZE}
-          max={MAX_CARD_FONT_SIZE}
+          min={min}
+          max={max}
           value={value}
           onChange={(e) => {
             const next = Number(e.target.value);
-            if (Number.isFinite(next)) onChange(clampCardFontSize(next));
+            if (Number.isFinite(next)) onChange(clamp(next));
           }}
           aria-label={label}
           className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-2 py-1.5 text-center text-xs text-white outline-none ring-indigo-400/40 focus:ring-2 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -378,7 +390,7 @@ function CardFontSizeControl({
         <button
           type="button"
           onClick={() => step(1)}
-          disabled={value >= MAX_CARD_FONT_SIZE}
+          disabled={value >= max}
           aria-label={increaseAria}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/30 text-sm text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
         >
@@ -415,6 +427,7 @@ export function SelectionPanel({
   const isTextCard = nodeType === 'text';
   const resolvedTitleSize = labelFontSize ?? DEFAULT_LABEL_FONT_SIZE;
   const resolvedBodySize = textFontSize ?? DEFAULT_TEXT_FONT_SIZE;
+  const resolvedGroupLabelSize = labelFontSize ?? DEFAULT_GROUP_LABEL_FONT_SIZE;
 
   return (
     <div className="pointer-events-auto absolute right-2 top-20 z-20 flex w-52 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-2xl sm:right-4 sm:top-24 sm:w-56">
@@ -429,24 +442,43 @@ export function SelectionPanel({
           className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-xs text-white outline-none ring-indigo-400/40 focus:ring-2"
         />
       </div>
+      {isGroup && onLabelFontSizeChange && (
+        <FontSizeControl
+          label={m.selectionPanel.groupLabelFontSize}
+          value={resolvedGroupLabelSize}
+          onChange={onLabelFontSizeChange}
+          decreaseAria={m.selectionPanel.groupLabelFontSizeDecrease}
+          increaseAria={m.selectionPanel.groupLabelFontSizeIncrease}
+          unit={m.selectionPanel.fontSizeUnit}
+          min={MIN_GROUP_LABEL_FONT_SIZE}
+          max={MAX_GROUP_LABEL_FONT_SIZE}
+          clamp={clampGroupLabelFontSize}
+        />
+      )}
       {isTextCard && onLabelFontSizeChange && (
-        <CardFontSizeControl
+        <FontSizeControl
           label={m.selectionPanel.titleFontSize}
           value={resolvedTitleSize}
           onChange={onLabelFontSizeChange}
           decreaseAria={m.selectionPanel.titleFontSizeDecrease}
           increaseAria={m.selectionPanel.titleFontSizeIncrease}
           unit={m.selectionPanel.fontSizeUnit}
+          min={MIN_CARD_FONT_SIZE}
+          max={MAX_CARD_FONT_SIZE}
+          clamp={clampCardFontSize}
         />
       )}
       {isTextCard && onTextFontSizeChange && (
-        <CardFontSizeControl
+        <FontSizeControl
           label={m.selectionPanel.bodyFontSize}
           value={resolvedBodySize}
           onChange={onTextFontSizeChange}
           decreaseAria={m.selectionPanel.bodyFontSizeDecrease}
           increaseAria={m.selectionPanel.bodyFontSizeIncrease}
           unit={m.selectionPanel.fontSizeUnit}
+          min={MIN_CARD_FONT_SIZE}
+          max={MAX_CARD_FONT_SIZE}
+          clamp={clampCardFontSize}
         />
       )}
       <div className="flex flex-col gap-1.5">

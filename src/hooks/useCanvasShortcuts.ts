@@ -5,16 +5,36 @@ type UseCanvasShortcutsOptions = {
   undo: () => void;
   redo: () => void;
   onDeleteSelection: () => void;
+  onCopySelection?: () => void;
+  onPasteClipboard?: () => void;
 };
 
 export function useCanvasShortcuts({
   undo,
   redo,
   onDeleteSelection,
+  onCopySelection,
+  onPasteClipboard,
 }: UseCanvasShortcutsOptions) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (runHistoryShortcut(event, undo, redo)) return;
+
+      if ((event.ctrlKey || event.metaKey) && !event.altKey) {
+        const key = event.key.toLowerCase();
+        if (key === 'c' && onCopySelection) {
+          if (isTypingTarget(event.target)) return;
+          event.preventDefault();
+          onCopySelection();
+          return;
+        }
+        if (key === 'v' && onPasteClipboard) {
+          if (isTypingTarget(event.target)) return;
+          event.preventDefault();
+          onPasteClipboard();
+          return;
+        }
+      }
 
       if (event.key !== 'Delete' && event.key !== 'Backspace') return;
       if (isTypingTarget(event.target)) return;
@@ -25,5 +45,5 @@ export function useCanvasShortcuts({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onDeleteSelection, redo, undo]);
+  }, [onCopySelection, onDeleteSelection, onPasteClipboard, redo, undo]);
 }

@@ -58,6 +58,9 @@ export type Messages = {
     bodyFontSize: string;
     bodyFontSizeDecrease: string;
     bodyFontSizeIncrease: string;
+    groupLabelFontSize: string;
+    groupLabelFontSizeDecrease: string;
+    groupLabelFontSizeIncrease: string;
     fontSizeUnit: string;
     color: string;
   };
@@ -167,7 +170,7 @@ export const messagesRu: Messages = {
   },
   hints: {
     desktop:
-      'Двойной клик — карточка · Клик по узлу — цвет и название · Линия — подпись · Delete',
+      'Двойной клик — карточка · Клик по узлу — цвет и название · Ctrl+C / Ctrl+V — копия · Delete',
     mobile: 'Тап×2 — карточка · Узел — цвет · Линия — подпись',
   },
   footer: {
@@ -193,7 +196,7 @@ export const messagesRu: Messages = {
     delete: 'Удалить связь',
   },
   selectionPanel: {
-    group: 'Группа',
+    group: 'Название группы',
     card: 'Карточка',
     groupNamePlaceholder: 'Название группы...',
     cardNamePlaceholder: 'Заголовок карточки...',
@@ -203,6 +206,9 @@ export const messagesRu: Messages = {
     bodyFontSize: 'Размер текста',
     bodyFontSizeDecrease: 'Уменьшить размер текста',
     bodyFontSizeIncrease: 'Увеличить размер текста',
+    groupLabelFontSize: 'Размер метки',
+    groupLabelFontSizeDecrease: 'Уменьшить размер метки группы',
+    groupLabelFontSizeIncrease: 'Увеличить размер метки группы',
     fontSizeUnit: 'px',
     color: 'Цвет',
   },
@@ -308,7 +314,7 @@ export const messagesEn: Messages = {
   },
   hints: {
     desktop:
-      'Double-click — new card · Click a node — name & color · Click a line — label · Delete',
+      'Double-click — new card · Click a node — name & color · Ctrl+C / Ctrl+V — duplicate · Delete',
     mobile: 'Double-tap — card · Node — color · Line — label',
   },
   footer: {
@@ -334,7 +340,7 @@ export const messagesEn: Messages = {
     delete: 'Delete connection',
   },
   selectionPanel: {
-    group: 'Group',
+    group: 'Group name',
     card: 'Card',
     groupNamePlaceholder: 'Group name...',
     cardNamePlaceholder: 'Card title...',
@@ -344,6 +350,9 @@ export const messagesEn: Messages = {
     bodyFontSize: 'Body text size',
     bodyFontSizeDecrease: 'Decrease body text size',
     bodyFontSizeIncrease: 'Increase body text size',
+    groupLabelFontSize: 'Label size',
+    groupLabelFontSizeDecrease: 'Decrease group label size',
+    groupLabelFontSizeIncrease: 'Increase group label size',
     fontSizeUnit: 'px',
     color: 'Color',
   },
@@ -449,7 +458,7 @@ export const messagesEs: Messages = {
   },
   hints: {
     desktop:
-      'Doble clic — nueva carta · Clic en nodo — nombre y color · Clic en línea — etiqueta · Delete',
+      'Doble clic — nueva carta · Clic en nodo — nombre y color · Ctrl+C / Ctrl+V — copia · Delete',
     mobile: 'Doble toque — carta · Nodo — color · Línea — etiqueta',
   },
   footer: {
@@ -475,7 +484,7 @@ export const messagesEs: Messages = {
     delete: 'Eliminar conexión',
   },
   selectionPanel: {
-    group: 'Grupo',
+    group: 'Nombre del grupo',
     card: 'Carta',
     groupNamePlaceholder: 'Nombre del grupo...',
     cardNamePlaceholder: 'Título de la carta...',
@@ -485,6 +494,9 @@ export const messagesEs: Messages = {
     bodyFontSize: 'Tamaño del texto',
     bodyFontSizeDecrease: 'Reducir tamaño del texto',
     bodyFontSizeIncrease: 'Aumentar tamaño del texto',
+    groupLabelFontSize: 'Tamaño de la etiqueta',
+    groupLabelFontSizeDecrease: 'Reducir tamaño de la etiqueta del grupo',
+    groupLabelFontSizeIncrease: 'Aumentar tamaño de la etiqueta del grupo',
     fontSizeUnit: 'px',
     color: 'Color',
   },
@@ -589,7 +601,7 @@ export const messagesZh: Messages = {
     languageAria: '界面语言',
   },
   hints: {
-    desktop: '双击 — 新卡片 · 点击节点 — 名称和颜色 · 点击连线 — 标签 · Delete',
+    desktop: '双击 — 新卡片 · 点击节点 — 名称和颜色 · Ctrl+C / Ctrl+V — 复制 · Delete',
     mobile: '双击 — 卡片 · 节点 — 颜色 · 连线 — 标签',
   },
   footer: {
@@ -615,7 +627,7 @@ export const messagesZh: Messages = {
     delete: '删除连线',
   },
   selectionPanel: {
-    group: '分组',
+    group: '分组名称',
     card: '卡片',
     groupNamePlaceholder: '分组名称...',
     cardNamePlaceholder: '卡片标题...',
@@ -625,6 +637,9 @@ export const messagesZh: Messages = {
     bodyFontSize: '正文字号',
     bodyFontSizeDecrease: '减小正文字号',
     bodyFontSizeIncrease: '增大正文字号',
+    groupLabelFontSize: '标签字号',
+    groupLabelFontSizeDecrease: '减小分组标签字号',
+    groupLabelFontSizeIncrease: '增大分组标签字号',
     fontSizeUnit: 'px',
     color: '颜色',
   },

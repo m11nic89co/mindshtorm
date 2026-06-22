@@ -47,6 +47,12 @@ import {
 } from '../lib/nodeLocale';
 import { createId } from '../lib/id';
 import {
+  cloneNodeForPaste,
+  isCopyableNode,
+  mergePastedNodes,
+  PASTE_OFFSET,
+} from '../lib/nodeClipboard';
+import {
   CANVAS_STORAGE_KEY,
   LEGACY_CANVAS_STORAGE_KEY,
   loadStoredCanvas,
@@ -108,6 +114,8 @@ function MindCanvasInner() {
   const connectStartNodeRef = useRef<string | null>(null);
   const groupResizeSnapshotRef = useRef<GroupResizeSnapshot | null>(null);
   const groupResizeLatestNodesRef = useRef<Node<CardNodeData>[] | null>(null);
+  const nodeClipboardRef = useRef<Node<CardNodeData>[] | null>(null);
+  const pasteGenerationRef = useRef(0);
   nodesRef.current = nodes;
   edgesRef.current = edges;
   const toastTimer = useRef<number | undefined>(undefined);
@@ -499,7 +507,39 @@ function MindCanvasInner() {
     setEdges((eds) => eds.filter((e) => !e.selected));
   }, [setEdges, setNodes]);
 
-  useCanvasShortcuts({ undo, redo, onDeleteSelection: deleteSelection });
+  const copySelection = useCallback(() => {
+    const selected = nodesRef.current.filter((node) => node.selected && isCopyableNode(node));
+    if (!selected.length) return;
+    nodeClipboardRef.current = structuredClone(selected);
+    pasteGenerationRef.current = 0;
+  }, []);
+
+  const pasteClipboard = useCallback(() => {
+    const sources = nodeClipboardRef.current;
+    if (!sources?.length) return;
+
+    pasteGenerationRef.current += 1;
+    const generation = pasteGenerationRef.current;
+    const offset = {
+      x: PASTE_OFFSET.x * generation,
+      y: PASTE_OFFSET.y * generation,
+    };
+
+    const pasted = sources.map((source) => {
+      const prefix = source.type === 'groupCard' ? 'group' : 'text';
+      return cloneNodeForPaste(source, createId(prefix), offset);
+    });
+
+    setNodes((nds) => mergePastedNodes(nds, pasted));
+  }, [setNodes]);
+
+  useCanvasShortcuts({
+    undo,
+    redo,
+    onDeleteSelection: deleteSelection,
+    onCopySelection: copySelection,
+    onPasteClipboard: pasteClipboard,
+  });
 
   const actions = useMemo(
     () => ({

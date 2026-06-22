@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useCanvasActions } from '../../context/canvasActions';
 import { useLocale } from '../../i18n/LocaleProvider';
 import { resolveColor } from '../../lib/colors';
+import { groupLabelBadgeStyle } from '../../lib/groupLabel';
 import { resolveLabelFontSize, resolveTextFontSize } from '../../lib/cardTypography';
 import type { CardNodeData } from '../../types/jsonCanvas';
 import { EdgeHandles } from './edgeHandles';
@@ -247,6 +248,16 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
   const [optimisticLabel, setOptimisticLabel] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const palette = resolveColor(data.color);
+  const badgeStyle = groupLabelBadgeStyle(data.labelFontSize);
+  const badgePositionStyle = {
+    top: badgeStyle.top,
+    maxWidth: badgeStyle.maxWidth,
+    fontSize: badgeStyle.fontSize,
+    paddingLeft: badgeStyle.paddingLeft,
+    paddingRight: badgeStyle.paddingRight,
+    paddingTop: badgeStyle.paddingTop,
+    paddingBottom: badgeStyle.paddingBottom,
+  };
 
   const storedLabel = data.label ?? '';
   const visibleLabel = optimisticLabel ?? storedLabel;
@@ -330,14 +341,15 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
                 cancelLabelEdit();
               }
             }}
-            className="nodrag nopan pointer-events-auto absolute -top-3 left-4 z-[1] max-w-48 rounded-full border border-white/20 bg-[#1a1f35] px-3 py-0.5 text-xs font-medium text-white outline-none ring-2 ring-cyan-400/40"
+            className="nodrag nopan pointer-events-auto absolute left-4 z-[1] truncate rounded-full border border-white/20 bg-[#1a1f35] font-medium text-white outline-none ring-2 ring-cyan-400/40"
+            style={badgePositionStyle}
             placeholder={m.group.namePlaceholder}
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
           <div
-            style={{ background: palette.border }}
-            className="pointer-events-auto absolute -top-3 left-4 z-[1] cursor-text rounded-full px-3 py-0.5 text-xs font-medium text-white/80 transition hover:ring-1 hover:ring-white/25"
+            style={{ background: palette.border, ...badgePositionStyle }}
+            className="pointer-events-auto absolute left-4 z-[1] cursor-text truncate rounded-full font-medium text-white/80 transition hover:ring-1 hover:ring-white/25"
             onDoubleClick={(e) => {
               e.stopPropagation();
               beginLabelEdit();
