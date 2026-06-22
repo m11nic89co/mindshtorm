@@ -21,11 +21,29 @@ export function TextCardNode({ id, data, selected }: TextCardProps) {
   const { updateNode } = useCanvasActions();
   const { m } = useLocale();
   const [editing, setEditing] = useState(false);
+  const [draftText, setDraftText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const palette = resolveColor(data.color);
 
+  const beginEditing = () => {
+    setDraftText(data.text ?? '');
+    setEditing(true);
+  };
+
+  const commitEditing = () => {
+    setEditing(false);
+    if (draftText !== (data.text ?? '')) {
+      updateNode(id, { text: draftText });
+    }
+  };
+
   useEffect(() => {
-    if (editing) textareaRef.current?.focus();
+    if (!editing) return;
+    const el = textareaRef.current;
+    if (!el) return;
+    el.focus();
+    const end = el.value.length;
+    el.setSelectionRange(end, end);
   }, [editing]);
 
   return (
@@ -51,7 +69,7 @@ export function TextCardNode({ id, data, selected }: TextCardProps) {
         }}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          setEditing(true);
+          beginEditing();
         }}
       >
         <EdgeHandles />
@@ -69,9 +87,19 @@ export function TextCardNode({ id, data, selected }: TextCardProps) {
           {editing ? (
             <textarea
               ref={textareaRef}
-              value={data.text ?? ''}
-              onChange={(e) => updateNode(id, { text: e.target.value })}
-              onBlur={() => setEditing(false)}
+              value={draftText}
+              onChange={(e) => setDraftText(e.target.value)}
+              onBlur={commitEditing}
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  setEditing(false);
+                  setDraftText(data.text ?? '');
+                }
+              }}
               className="h-full min-h-[3rem] w-full resize-none bg-transparent text-sm leading-relaxed text-white/90 outline-none placeholder:text-white/35"
               placeholder={m.card.placeholder}
             />
@@ -110,11 +138,29 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
   const { updateNode, onGroupResizeStart, onGroupResize, onGroupResizeEnd } = useCanvasActions();
   const { m } = useLocale();
   const [editingLabel, setEditingLabel] = useState(false);
+  const [draftLabel, setDraftLabel] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const palette = resolveColor(data.color);
 
+  const beginLabelEdit = () => {
+    setDraftLabel(data.label ?? '');
+    setEditingLabel(true);
+  };
+
+  const commitLabelEdit = () => {
+    setEditingLabel(false);
+    if (draftLabel !== (data.label ?? '')) {
+      updateNode(id, { label: draftLabel });
+    }
+  };
+
   useEffect(() => {
-    if (editingLabel) inputRef.current?.focus();
+    if (!editingLabel) return;
+    const el = inputRef.current;
+    if (!el) return;
+    el.focus();
+    const end = el.value.length;
+    el.setSelectionRange(end, end);
   }, [editingLabel]);
 
   return (
@@ -145,11 +191,22 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
         {editingLabel ? (
           <input
             ref={inputRef}
-            value={data.label ?? ''}
-            onChange={(e) => updateNode(id, { label: e.target.value })}
-            onBlur={() => setEditingLabel(false)}
+            value={draftLabel}
+            onChange={(e) => setDraftLabel(e.target.value)}
+            onBlur={commitLabelEdit}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') setEditingLabel(false);
+              e.stopPropagation();
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                commitLabelEdit();
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                setEditingLabel(false);
+                setDraftLabel(data.label ?? '');
+              }
             }}
             className="pointer-events-auto absolute -top-3 left-4 z-[1] max-w-48 rounded-full border border-white/20 bg-[#1a1f35] px-3 py-0.5 text-xs font-medium text-white outline-none ring-2 ring-cyan-400/40"
             placeholder={m.group.namePlaceholder}
@@ -161,7 +218,7 @@ export function GroupCardNode({ id, data, selected }: TextCardProps) {
             className="pointer-events-auto absolute -top-3 left-4 z-[1] cursor-text rounded-full px-3 py-0.5 text-xs font-medium text-white/80 transition hover:ring-1 hover:ring-white/25"
             onDoubleClick={(e) => {
               e.stopPropagation();
-              setEditingLabel(true);
+              beginLabelEdit();
             }}
             title={m.group.renameTitle}
           >
